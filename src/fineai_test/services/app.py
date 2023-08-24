@@ -43,7 +43,7 @@ async def get_images_by_job(job_id):
 async def compare_job_results(job_id1, job_id2):
 
     async def get_result(s, job_id):
-        stmt = select(Job.result).where(Job.id==job_id)
+        stmt = select(Job.result).where(Job.id==job_id, Job.job_kind=='dataset_verify')
         rs = await s.execute(stmt)
         if row:=rs.one_or_none():
             return row[0]['extras'] if row[0] else {}
