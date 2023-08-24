@@ -12,6 +12,12 @@
         th {
             height: 30px;
         }
+        .xx {
+            width: 100px;
+        }
+        tr.different {
+            background-color: lightsalmon;
+        }
         td {
             height: 100px;
         }
@@ -55,16 +61,23 @@
         <thead class="sticky">
             <tr>
                 <th colspan="2">{{ job_id1 }}</th>
-                <th></th>
+                <th class="xx"></th>
                 <th colspan="2">{{ job_id2 }}</th>
+            </tr>
+            <tr>
+                <th>origin -></th>
+                <th><img src="{{ job1_uri }}" onclick="zoomImage(this)"></th>
+                <th class="xx"></th>
+                <th>origin -></th>
+                <th><img src="{{ job2_uri }}" onclick="zoomImage(this)"></th>
             </tr>  
         </thead>
         <tbody>
             {% for result in vs_list %}
-            <tr>
+            <tr class="{{ result[2] }}">
                 <td>{{ result[0]["no"] }}</td>
                 <td>{{ result[0]["message"] }}</td>
-                <td>
+                <td class="xx">
                     <img src="{{ result[1]['uri'] }}" onclick="zoomImage(this)">
                 </td>
                 <td>{{ result[1]["no"] }}</td>

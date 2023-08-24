@@ -46,24 +46,27 @@ async def compare_job_results(job_id1, job_id2):
         stmt = select(Job.result).where(Job.id==job_id)
         rs = await s.execute(stmt)
         if row:=rs.one_or_none():
-            return row[0]['extras']['images'] if row[0] else []
-        return []
+            return row[0]['extras'] if row[0] else {}
+        return {}
 
     async with Sess() as sess:
         # tasks = []
         # for job_id in (job_id1, job_id2):
         #     tasks.append(get_result(sess, job_id))
         # job1, job2 = await asyncio.gather(*tasks)
-        
-        job1 = {ret['no']:ret for ret in await get_result(sess, job_id1)}
-        job2 = {ret['no']:ret for ret in await get_result(sess, job_id2)}
+        j1 = await get_result(sess, job_id1)
+        j2 = await get_result(sess, job_id2)
+        job1_uri = to_url(j1['uri']['uri']) if j1 else ""
+        job2_uri = to_url(j2['uri']['uri']) if j2 else ""
+        job1_images = {ret['no']:ret for ret in j1['images']} if j1 else {}
+        job2_images = {ret['no']:ret for ret in j2['images']} if j2 else {}
 
-    vs_set = set(job1) & set(job2)
-    job1_set = set(job1) - set(job2)
-    job2_set = set(job2) - set(job1)
-    vs_list = [(job1[no], job2[no]) for no in vs_set]
-    job1_list = [job1[no] for no in job1_set]
-    job2_list = [job2[no] for no in job2_set]
+    vs_set = set(job1_images) & set(job2_images)
+    job1_set = set(job1_images) - set(job2_images)
+    job2_set = set(job2_images) - set(job1_images)
+    vs_list = [(job1_images[no], job2_images[no], 'different' if job1_images[no]['message'] != job2_images[no]['message'] else 'same') for no in vs_set]
+    job1_list = [job1_images[no] for no in job1_set]
+    job2_list = [job2_images[no] for no in job2_set]
     for j in vs_list:
         j[0]['uri'] = to_url(j[0]['uri'])
         j[1]['uri'] = to_url(j[1]['uri'])
@@ -72,6 +75,8 @@ async def compare_job_results(job_id1, job_id2):
     for j in job2_list:
         j['uri'] = to_url(j['uri'])
     return {
+        "job1_uri": job1_uri,
+        "job2_uri": job2_uri,
         "vs_list": vs_list,
         "job1_list": job1_list,
         "job2_list": job2_list
