@@ -1,0 +1,1 @@
+nohup uvicorn fineai_test:app --reload &>> logs/log &

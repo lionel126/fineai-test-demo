@@ -1,0 +1,40 @@
+[project]
+name = "fineai-test"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "chenshengguo", email = "chenshengguo@xinpianchang.com" }
+]
+dependencies = [
+    "fastapi>=0.101.1",
+    "uvicorn>=0.23.2",
+    "pytest>=7.4.0",
+    "ruff>=0.0.285",
+    "sqlalchemy[asyncio]>=2.0.20",
+    "asyncio>=3.4.3",
+    "aiohttp>=3.8.5",
+    "coverage>=7.3.0",
+    "jinja2>=3.1.2",
+    "asyncpg>=0.28.0",
+    "requests>=2.31.0",
+    "pyjwt>=2.8.0",
+    "hashids>=1.3.1",
+    "pydantic-settings>=2.0.3",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "ruff>=0.0.285",
+    "sqlacodegen-v2>=0.1.4",
+    "psycopg2-binary>=2.9.7",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true

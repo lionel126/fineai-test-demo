@@ -1,0 +1,52 @@
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: chensg-test
+  namespace: fineai
+spec:
+  terminationGracePeriodSeconds: 1
+  securityContext:
+    runAsUser: 0
+    runAsNonRoot: false
+  containers:
+    - name: test
+      image: xpc-cn-beijing.cr.volces.com/fineai/fineai-task-face-recog:latest
+      imagePullPolicy: Always
+      resources:
+        limits:
+          cpu: 8000m
+          ephemeral-storage: 5Gi
+          memory: 24Gi
+          nvidia.com/gpu: 1
+        requests:
+          cpu: 1m
+          ephemeral-storage: 5Gi
+          memory: 5Mi
+          nvidia.com/gpu: 1
+      env:
+        - name: TZ
+          value: Asia/Shanghai
+        - name: CUDA_TOOLKIT_ROOT_DIR
+          value: /usr/local/cuda
+      volumeMounts:
+        - mountPath: /app/logs
+          name: data
+          subPath: chensg/logs
+      command:
+        - sh
+        - -c
+        - tail -f /dev/null
+      workingDir: /root
+  volumes:
+    - name: data
+      nfs:
+        path: /
+        server: 172.27.232.3
+  dnsConfig:
+    nameservers:
+      - 114.114.114.114
+      - 223.6.6.6
+  dnsPolicy: None
+  restartPolicy: Never
+EOF
