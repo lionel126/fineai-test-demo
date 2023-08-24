@@ -1,5 +1,5 @@
 # from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-import asyncio
+# import asyncio
 from sqlalchemy import insert, update, select
 from fineai_test.db import Sess
 from fineai_test.db.app import UploadImageFile, Job
@@ -81,3 +81,16 @@ async def compare_job_results(job_id1, job_id2):
         "job1_list": job1_list,
         "job2_list": job2_list
     }
+
+async def get_images_by_model(model_id):
+    async with Sess() as sess:
+        stmt = select(UploadImageFile).where(UploadImageFile.user_model_id==model_id).order_by(UploadImageFile.id)
+        rs = (await sess.execute(stmt)).all()
+        for r in rs:
+            r[0].url = to_url(r[0].path)
+        ret = {
+            "keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time"],
+            "images": [r[0] for r in rs]
+        }
+        # print(ret)
+        return ret

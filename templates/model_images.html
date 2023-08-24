@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>images</title>
+        <style type="text/css">
+            table, th, td {
+                border: 1px solid black;
+                border-collapse: collapse;
+            }
+            img {
+                height: 100px;
+                transition: all 0.1s ease-in-out;
+            }
+            img.zoomed {
+                position: fixed;
+                /* 或者使用 position: absolute; */
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 80%;
+                height: 80%;
+                z-index: 9999;
+                object-fit: contain;
+                margin: auto;
+            }
+            tr.face_detection {
+                background-color: lightcyan;
+            }
+            .checked {
+                background-color: lightgreen;
+            }
+            .sticky {
+                position: sticky;
+                top: 0px;
+            }
+        </style>
+        <script>
+            function zoomImage(img) {
+                if (!img.classList.contains('zoomed')) {
+                    img.classList.add('zoomed');
+                } else {
+                    img.classList.remove('zoomed');
+                }
+            }
+    
+        </script>
+    </head>
+    <body>
+        <table>
+            <thead class="sticky">
+                <tr>
+                    {% for key in keys %}
+                    <th>{{ key }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for image in images %}                
+                <tr class="{{ 'face_detection' if image['image_type'] == 'face_detection' }}">                                
+                    {% for key in keys %}
+                        {% if key!="url" %}
+                        <td class="{{ 'checked' if key=='status' and image[key] == 'checked' }}">{{ image[key] }}</td>
+                        {% else %}
+                        <td><img src="{{ image[key] }}" onclick="zoomImage(this)"></td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </body>
+</html>
