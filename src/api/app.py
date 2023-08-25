@@ -1,4 +1,3 @@
-import os
 import requests
 from requests.models import Response
 from urllib.parse import urljoin, urlparse

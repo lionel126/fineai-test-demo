@@ -1,17 +1,18 @@
 # from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 # import asyncio
-from sqlalchemy import insert, update, select
+from sqlalchemy import select
 from fineai_test.db import Sess
 from fineai_test.db.app import UploadImageFile, Job
-from fineai_test.utils.utils import to_url
+from fineai_test.utils.utils import to_url, key_to_url, file_name
+
 
 async def get_images_by_job(job_id):
     async with Sess() as sess:
-        stmt = select(UploadImageFile).where(UploadImageFile.job_id==job_id)
+        stmt = select(UploadImageFile).where(UploadImageFile.job_id == job_id)
         rs = await sess.execute(stmt)
         # return [row._mapping['UploadImageFile'] for row in rs.all()]
         return [row[0] for row in rs.all()]
-    
+
 # async def compare_job_results(job_id1, job_id2):
 #     async with Sess() as sess:
 #         stmt1 = select(UploadImageFile).where(UploadImageFile.job_id==job_id1)
@@ -40,12 +41,14 @@ async def get_images_by_job(job_id):
 #         "job2_list": job2_list
 #     }
 
+
 async def compare_job_results(job_id1, job_id2):
 
     async def get_result(s, job_id):
-        stmt = select(Job.result).where(Job.id==job_id, Job.job_kind=='dataset_verify')
+        stmt = select(Job.result).where(Job.id == job_id,
+                                        Job.job_kind == 'dataset_verify')
         rs = await s.execute(stmt)
-        if row:=rs.one_or_none():
+        if row := rs.one_or_none():
             return row[0]['extras'] if row[0] else {}
         return {}
 
@@ -58,13 +61,14 @@ async def compare_job_results(job_id1, job_id2):
         j2 = await get_result(sess, job_id2)
         job1_uri = to_url(j1['uri']['uri']) if j1 else ""
         job2_uri = to_url(j2['uri']['uri']) if j2 else ""
-        job1_images = {ret['no']:ret for ret in j1['images']} if j1 else {}
-        job2_images = {ret['no']:ret for ret in j2['images']} if j2 else {}
+        job1_images = {ret['no']: ret for ret in j1['images']} if j1 else {}
+        job2_images = {ret['no']: ret for ret in j2['images']} if j2 else {}
 
     vs_set = set(job1_images) & set(job2_images)
     job1_set = set(job1_images) - set(job2_images)
     job2_set = set(job2_images) - set(job1_images)
-    vs_list = [(job1_images[no], job2_images[no], 'different' if job1_images[no]['message'] != job2_images[no]['message'] else 'same') for no in vs_set]
+    vs_list = [(job1_images[no], job2_images[no], 'different' if job1_images[no]
+                ['message'] != job2_images[no]['message'] else 'same') for no in vs_set]
     job1_list = [job1_images[no] for no in job1_set]
     job2_list = [job2_images[no] for no in job2_set]
     for j in vs_list:
@@ -82,9 +86,11 @@ async def compare_job_results(job_id1, job_id2):
         "job2_list": job2_list
     }
 
+
 async def get_images_by_model(model_id):
     async with Sess() as sess:
-        stmt = select(UploadImageFile).where(UploadImageFile.user_model_id==model_id).order_by(UploadImageFile.id)
+        stmt = select(UploadImageFile).where(
+            UploadImageFile.user_model_id == model_id).order_by(UploadImageFile.id)
         rs = (await sess.execute(stmt)).all()
         for r in rs:
             r[0].url = to_url(r[0].path)
@@ -94,3 +100,43 @@ async def get_images_by_model(model_id):
         }
         # print(ret)
         return ret
+
+
+async def get_lora_job(job_id):
+    async with Sess() as sess:
+        stmt = select(Job).where(Job.id == job_id)
+        rs = (await sess.execute(stmt)).one_or_none()
+        if rs:
+            if rs[0].status == 'success':
+                params_images_list = [(file_name(image['uri']), image)
+                                      for image in rs[0].params['images']]
+                params_images = dict(params_images_list)
+                assert len(params_images_list) == len(params_images)
+                training_images = {file_name(
+                    img['key']): img for img in rs[0].result['extras']['training_resources'] if img['kind'] == 'image'}
+                assert len(training_images) == len(params_images)
+                assert set(params_images) - set(training_images) == set(
+                ), f'{set(params_images) - set(training_images)}'
+                assert set(training_images) - set(params_images) == set(
+                ), f'{set(training_images) - set(params_images)}'
+
+                combined = [{**params_images[key], **training_images[key]}
+                            for key in params_images]
+                combined.sort(key=lambda it: it['no'])
+                for img in combined:
+                    img['url'] = to_url(img['uri'])
+                    img['trained_url'] = key_to_url(img['key'])
+                return {
+                    "status": rs[0].status,
+                    "images": combined
+                }
+            else:
+                assert rs[0].params['images'] == rs[0].result['extras']['images']
+                images = rs[0].params['images']
+                for img in images:
+                    img['url'] = to_url(img['uri'])
+                return {
+                    "status": rs[0].status,
+                    "images": images,
+                    "message": rs[0].result['message']
+                }

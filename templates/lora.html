@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>images</title>
+        <title>lora training images</title>
         <style type="text/css">
             table, th, td {
                 border: 1px solid black;
@@ -25,19 +25,11 @@
                 object-fit: contain;
                 margin: auto;
             }
-            tr.face_detection {
-                background-color: lightcyan;
-            }
+            
             td {
                 height: 100px;
             }
-            .deleted {
-                text-decoration:line-through;
-                background-color: dimgray;
-            }
-            .checked {
-                background-color: lightgreen;
-            }
+            
             .sticky {
                 position: sticky;
                 top: 0px;
@@ -55,24 +47,26 @@
         </script>
     </head>
     <body>
+        <h3>
+            <div>status: {{ status }}</div> 
+            {% if message %}
+            <div>message: {{ message }}</div>
+            {% endif %}
+        </h3>
         <table>
-            <thead class="sticky">
+            <thead class="sticky">                
                 <tr>
-                    {% for key in keys %}
-                    <th>{{ key }}</th>
-                    {% endfor %}
+                    <th></th>
+                    <th>uploaded</th>
+                    <th>trained</th>
                 </tr>
             </thead>
             <tbody>
-                {% for image in images %}
-                <tr class="{{ ['face_detection' if image['image_type'] == 'face_detection','deleted' if image['is_delete'] == True]|join('') }}">
-                    {% for key in keys %}
-                        {% if key!="url" %}
-                        <td class="{{ 'checked' if key=='status' and image[key] == 'checked' }}">{{ image[key] }}</td>
-                        {% else %}
-                        <td><img src="{{ image[key] }}" onclick="zoomImage(this)"></td>
-                        {% endif %}
-                    {% endfor %}
+                {% for image in images %}                
+                <tr>                                
+                    <td>{{ image['no'] }}</td>
+                    <td><img src="{{ image['url'] }}" onclick="zoomImage(this)"></td>
+                    <td><img src="{{ image['trained_url'] }}" onclick="zoomImage(this)"></td>    
                 </tr>
                 {% endfor %}
             </tbody>

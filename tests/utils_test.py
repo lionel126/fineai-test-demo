@@ -1,5 +1,3 @@
-from hashids import Hashids
-from datetime import datetime
 from fineai_test.utils.utils import to_url, jwt_token
 
 def test_url():

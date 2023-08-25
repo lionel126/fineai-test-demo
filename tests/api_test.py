@@ -1,5 +1,4 @@
 import os
-import requests
 import pytest
 from api.app import App, upload
 
@@ -13,9 +12,9 @@ os.environ['http_proxy'] = 'http://192.168.8.27:8000'
 os.environ['https_proxy'] = 'http://192.168.8.27:8000'
 os.environ['REQUESTS_CA_BUNDLE'] = '/Users/chensg/.mitmproxy/mitmproxy-ca-cert.cer'
 
+
 def test_dataset_create():
     file = '/Users/chensg/Pictures/6094e19d8f146.jpeg'
-    dataset_dir = '/Users/chensg/Pictures/scarlettJohansson'
 
     model_id = 78
     # image_id = 1384
@@ -25,13 +24,14 @@ def test_dataset_create():
     app = App(base_url)
 
     # model_id = app.create_model().json()['data']['id']
-    
+
     json = {"modelId": model_id, "fileName": file.split('/')[-1]}
     data = app.create_face(json).json()['data']
     image_id = data['id']
     upload(file, data['host'], data['uploadParam'])
 
-    job_id = app.finish_face({"imageId":image_id, "modelId":model_id}).json()['data']['jobId']
+    job_id = app.finish_face({"imageId": image_id, "modelId": model_id}).json()[
+        'data']['jobId']
     print(f'face job: {job_id}')
 
     # dataset = os.listdir(dataset_dir)
@@ -43,11 +43,12 @@ def test_dataset_create():
     # job_id = app.finish_dataset(model_id, ids).json()['data']['jobId']
     # print(f'dataset job: {job_id}')
 
+
 @pytest.mark.parametrize('job_id', [
     '8a040fa4-d865-433f-8e95-d2e9e4a5adbe'
 ])
 def test_job_state(job_id):
-    
+
     app = App(base_url)
     j = app.job_state(job_id).json()
     print(f'{job_id}: {j}')
