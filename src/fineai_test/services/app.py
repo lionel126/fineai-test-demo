@@ -88,27 +88,45 @@ async def compare_job_results(job_id1, job_id2):
     }
 
 
-async def get_model(model_id):
+async def get_model(model_id, job_id=None):
     async with Sess() as sess:
         stmt = select(UploadImageFile).where(
             UploadImageFile.user_model_id == model_id).order_by(UploadImageFile.id)
         rs = (await sess.execute(stmt)).all()
-        for r in rs:
-            r[0].url = to_url(r[0].path)
+        images = [r[0] for r in rs]
+        for img in images:
+            img.url = to_url(img.path)
 
-        lora_jobs = None
+        jobs = None
         stmt = select(Job).where(Job.user_model_id == model_id).order_by(Job.created_time.desc())
-        lora_jobs = [job[0] for job in (await sess.execute(stmt)).all()]
-        print(lora_jobs)
+        jobs = [job[0] for job in (await sess.execute(stmt)).all()]
+
+        if not job_id:
+            lora_jobs = [job for job in jobs if job.job_kind == 'lora_train']
+            if lora_jobs:
+                job_id = lora_jobs[0].id
+        
+        if job_id:
+            lora_job = await get_lora_job(job_id)
+            count = 0
+            for image in images:
+                for img in lora_job['images']:
+                    if str(image.id) == img['no']:
+                        count += 1
+                        image.uploaded = img['url']
+                        image.trained = img['trained_url'] if 'trained_url' in img else ''
+                        image.txt = img['txt'] if 'txt' in img else ''
+            assert len(lora_job['images']) == count, f"{ len(lora_job['images']) } == {count }"
+
 
         ret = {
-            "keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time"],
-            "images": [r[0] for r in rs],
-            "lora_keys": ["id", "job_kind", 
+            "keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time", "uploaded", "trained", "txt"],
+            "images": images,
+            "job_keys": ["id", "job_kind", 
                         #   "params", "result", 
                           "priority", "status", 
                           "is_delete", "created_time", "theme_param"],
-            "lora_jobs": lora_jobs
+            "jobs": jobs
         }
         # print(ret)
         return ret
@@ -132,7 +150,6 @@ async def get_lora_job(job_id):
                         # no region in data, so fix it
                         s3c = s3.get_s3_client(img['vendor'], 'cn-beijing')
                         txt = s3c.get_object(Bucket=img['bucket'], Key=img['key'])
-                        # print(str(txt['Body'].read(), 'utf8'))
                         training_txt[file_name(img['key'])] = str(txt['Body'].read(), 'utf8')
                 
                 assert len(training_images) == len(params_images)
@@ -153,12 +170,12 @@ async def get_lora_job(job_id):
                     "images": combined
                 }
             else:
-                assert rs[0].params['images'] == rs[0].result['extras']['images']
+                # assert rs[0].params['images'] == rs[0].result['extras']['images']
                 images = rs[0].params['images']
                 for img in images:
                     img['url'] = to_url(img['uri'])
                 return {
                     "status": rs[0].status,
                     "images": images,
-                    "message": rs[0].result['message']
+                    "message": rs[0].result['message'] if rs[0].result else ""
                 }

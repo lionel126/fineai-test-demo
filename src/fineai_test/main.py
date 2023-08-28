@@ -24,13 +24,16 @@ async def compare_job(request: Request, job_id1, job_id2):
 
 @app.get(path="/job/{job_id}/images")
 async def job_images(job_id):
+    '''不大对
+    '''
     return await get_images_by_job(job_id)
 
 
 @app.get(path="/model/{model_id}")
-async def model(request: Request, model_id: int):
+@app.get(path="/model/{model_id}/lora/{lora_id}")
+async def model(request: Request, model_id: int, lora_id=None):
     '''todo: join all lora_train jobs'''
-    ret = await get_model(model_id)
+    ret = await get_model(model_id, lora_id)
     data = {"request": request, **ret}
     return templates.TemplateResponse("model.html", data)
 
