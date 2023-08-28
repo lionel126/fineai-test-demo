@@ -8,6 +8,10 @@
                 border: 1px solid black;
                 border-collapse: collapse;
             }
+            table {
+                float: left;
+                margin-right: 100pxG;
+            }
             img {
                 height: 100px;
                 transition: all 0.1s ease-in-out;
@@ -65,7 +69,7 @@
             </thead>
             <tbody>
                 {% for image in images %}
-                <tr class="{{ ['face_detection' if image['image_type'] == 'face_detection','deleted' if image['is_delete'] == True]|join('') }}">
+                <tr class="{{ ['face_detection' if image['image_type'] == 'face_detection','deleted' if image['is_delete'] == True]|join(' ') }}">
                     {% for key in keys %}
                         {% if key!="url" %}
                         <td class="{{ 'checked' if key=='status' and image[key] == 'checked' }}">{{ image[key] }}</td>
@@ -77,6 +81,23 @@
                 {% endfor %}
             </tbody>
         </table>
-
+        <table>
+            <thead>
+                <tr>
+                    {% for k in lora_keys %}
+                    <th>{{ k }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in lora_jobs %}
+                <tr>
+                    {% for k in lora_keys %}
+                    <td> {{ job[k] }} </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </body>
 </html>

@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from fineai_test.services.app import get_images_by_job, compare_job_results, get_images_by_model, get_lora_job
+from fineai_test.services.app import get_images_by_job, compare_job_results, get_model, get_lora_job
 
 app = FastAPI()
 
@@ -27,11 +27,12 @@ async def job_images(job_id):
     return await get_images_by_job(job_id)
 
 
-@app.get(path="/model/{model_id}/images")
-async def model_images(request: Request, model_id: int):
-    ret = await get_images_by_model(model_id)
+@app.get(path="/model/{model_id}")
+async def model(request: Request, model_id: int):
+    '''todo: join all lora_train jobs'''
+    ret = await get_model(model_id)
     data = {"request": request, **ret}
-    return templates.TemplateResponse("model_images.html", data)
+    return templates.TemplateResponse("model.html", data)
 
 
 @app.get(path="/lora/{job_id}")

@@ -87,16 +87,27 @@ async def compare_job_results(job_id1, job_id2):
     }
 
 
-async def get_images_by_model(model_id):
+async def get_model(model_id):
     async with Sess() as sess:
         stmt = select(UploadImageFile).where(
             UploadImageFile.user_model_id == model_id).order_by(UploadImageFile.id)
         rs = (await sess.execute(stmt)).all()
         for r in rs:
             r[0].url = to_url(r[0].path)
+
+        lora_jobs = None
+        stmt = select(Job).where(Job.user_model_id == model_id).order_by(Job.created_time.desc())
+        lora_jobs = [job[0] for job in (await sess.execute(stmt)).all()]
+        print(lora_jobs)
+
         ret = {
             "keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time"],
-            "images": [r[0] for r in rs]
+            "images": [r[0] for r in rs],
+            "lora_keys": ["id", "job_kind", 
+                        #   "params", "result", 
+                          "priority", "status", 
+                          "is_delete", "created_time", "theme_param"],
+            "lora_jobs": lora_jobs
         }
         # print(ret)
         return ret
@@ -125,7 +136,7 @@ async def get_lora_job(job_id):
                 combined.sort(key=lambda it: it['no'])
                 for img in combined:
                     img['url'] = to_url(img['uri'])
-                    img['trained_url'] = key_to_url(img['key'])
+                    img['trained_url'] = key_to_url(img['key'], img['bucket'])
                 return {
                     "status": rs[0].status,
                     "images": combined
