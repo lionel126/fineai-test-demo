@@ -63,7 +63,11 @@
         <table>
             <thead class="sticky">
                 <tr>
-                    {% for key in keys %}
+                    <th colspan="{{ model_keys|length }}">model: {{ model_id }}</th>
+                    <th colspan="{{ lora_keys|length }}" style="text-align: left;">lora: {{ lora_id }}<br>status: {{ lora_status }}</th>
+                </tr>
+                <tr>
+                    {% for key in model_keys + lora_keys %}
                     <th>{{ key }}</th>
                     {% endfor %}
                 </tr>
@@ -71,7 +75,7 @@
             <tbody>
                 {% for image in images %}
                 <tr class="{{ ['face_detection' if image['image_type'] == 'face_detection','deleted' if image['is_delete'] == True]|join(' ') }}">
-                    {% for key in keys %}
+                    {% for key in  model_keys + lora_keys %}
                         {% if key not in ("url", "uploaded", "trained") %}
                         <td class="{{ 'checked' if key=='status' and image[key] == 'checked' }}">{{ image[key] }}</td>
                         {% else %}
@@ -82,8 +86,9 @@
                 {% endfor %}
             </tbody>
         </table>
+
         <table>
-            <thead>
+            <thead>                
                 <tr>
                     {% for k in job_keys %}
                     <th>{{ k }}</th>
@@ -94,7 +99,11 @@
                 {% for job in jobs %}
                 <tr>
                     {% for k in job_keys %}
-                    <td> {{ job[k] }} </td>
+                        {% if k == "id" and job["job_kind"] == "lora_train" %}
+                        <td><a href="/model/{{model_id}}/lora/{{ job[k] }}">{{ job[k] }}</a> </td>
+                        {% else %}
+                        <td> {{ job[k] }} </td>
+                        {% endif %}
                     {% endfor %}
                 </tr>
                 {% endfor %}

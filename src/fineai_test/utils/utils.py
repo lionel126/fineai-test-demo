@@ -36,7 +36,6 @@ def key_to_url(key, bucket='fineai-test'):
         return f'https://fineai-secure0.xpccdn.com/{key}~tplv-5x3rixm6so-watermark-v1:0:0:q100.image'
 
 
-
 def jwt_token(iss='http://192.168.103.101:9090'):
     user_id = 1
     open_id = 'csgoA_WQ63tqac75U0iL6tIUWYQhmow'
