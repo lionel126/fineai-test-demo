@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     postgresql_uri:str = 'postgresql+asyncpg://appuser:4b9d46ebc@10.173.4.249:5432/app_store'
     sql_echo:bool = True
 
+    bucket: dict[str, dict[str, BucketSetting]] = {}
+
+    def get_bucket(self, vendor: str, region: str) -> BucketSetting | None:
+        return self.bucket.get(vendor, {}).get(region)
 
 
 settings = Settings()

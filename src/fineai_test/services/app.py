@@ -4,6 +4,7 @@ from sqlalchemy import select
 from fineai_test.db import Sess
 from fineai_test.db.app import UploadImageFile, Job
 from fineai_test.utils.utils import to_url, key_to_url, file_name
+from fineai_test.utils import s3
 
 
 async def get_images_by_job(job_id):
@@ -125,15 +126,25 @@ async def get_lora_job(job_id):
                 assert len(params_images_list) == len(params_images)
                 training_images = {file_name(
                     img['key']): img for img in rs[0].result['extras']['training_resources'] if img['kind'] == 'image'}
+                training_txt = {}
+                for img in rs[0].result['extras']['training_resources']:
+                    if img['kind'] == 'txt':
+                        # no region in data, so fix it
+                        s3c = s3.get_s3_client(img['vendor'], 'cn-beijing')
+                        txt = s3c.get_object(Bucket=img['bucket'], Key=img['key'])
+                        # print(str(txt['Body'].read(), 'utf8'))
+                        training_txt[file_name(img['key'])] = str(txt['Body'].read(), 'utf8')
+                
                 assert len(training_images) == len(params_images)
                 assert set(params_images) - set(training_images) == set(
                 ), f'{set(params_images) - set(training_images)}'
                 assert set(training_images) - set(params_images) == set(
                 ), f'{set(training_images) - set(params_images)}'
 
-                combined = [{**params_images[key], **training_images[key]}
+                combined = [{**params_images[key], **training_images[key], "txt": training_txt[key]}
                             for key in params_images]
                 combined.sort(key=lambda it: it['no'])
+                
                 for img in combined:
                     img['url'] = to_url(img['uri'])
                     img['trained_url'] = key_to_url(img['key'], img['bucket'])

@@ -59,6 +59,7 @@
                     <th></th>
                     <th>uploaded</th>
                     <th>trained</th>
+                    <th>txt</th>
                 </tr>
             </thead>
             <tbody>
@@ -67,6 +68,7 @@
                     <td>{{ image['no'] }}</td>
                     <td><img src="{{ image['url'] }}" onclick="zoomImage(this)"></td>
                     <td><img src="{{ image['trained_url'] }}" onclick="zoomImage(this)"></td>    
+                    <td style="max-width:1000px;word-wrap:break-word">{{ image['txt'] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
