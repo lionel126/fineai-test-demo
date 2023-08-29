@@ -21,8 +21,8 @@ class UserModel(BaseModel):
 async def root(request:Request):
     # s, stmt = await get_models_pagination()
     # return paginate(s, stmt)
-    size = request.query_params.get('size', 200)
-    page = request.query_params.get('page', 1)
+    size = int(request.query_params.get('size', 200))
+    page = int(request.query_params.get('page', 1))
     data = {
         'request': request,
         **await get_models(size, page)

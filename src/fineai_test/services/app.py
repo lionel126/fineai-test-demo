@@ -149,7 +149,7 @@ async def get_lora_result(job_id):
 
         combined = [{**params_images[key], **training_images[key], "txt": training_txt[key]}
                     for key in training_images]
-        combined.sort(key=lambda it: int(it['id']))
+        combined.sort(key=lambda it: int(it.get('id', 0)))
 
         for img in combined:
             img['url'] = to_url(img['uri'])
