@@ -1,22 +1,13 @@
 import requests
-from requests.models import Response
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 from fineai_test.utils.utils import jwt_token
+from .session import Session
 
-
-class Session(requests.Session):
-    def __init__(self, base_url=None):
-        super().__init__()
-        self.base_url = base_url
-    
-    def request(self, method: str | bytes, url: str | bytes, *args, **kwargs) -> Response:
-        joined_url = urljoin(self.base_url, url)
-        return super().request(method, joined_url, *args, **kwargs)
 
 class App():
     
-    def __init__(self, base_url):
+    def __init__(self, base_url=None):
         # s = requests.Session()
         s = Session(base_url)
         # s.proxies = proxies

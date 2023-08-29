@@ -2,15 +2,6 @@ import os
 import pytest
 from api.app import App, upload
 
-# host = 'http://192.168.103.101:9090'
-base_url = 'https://dev-wukm.vmovier.cc'
-
-# cert = '/Users/chensg/.mitmproxy/mitmproxy-ca-cert.cer'
-# proxies = {'http': 'http://192.168.8.27:8000', 'https': 'http://192.168.8.27:8000'}
-
-os.environ['http_proxy'] = 'http://192.168.8.27:8000'
-os.environ['https_proxy'] = 'http://192.168.8.27:8000'
-os.environ['REQUESTS_CA_BUNDLE'] = '/Users/chensg/.mitmproxy/mitmproxy-ca-cert.cer'
 
 
 def test_dataset_create():
@@ -21,7 +12,7 @@ def test_dataset_create():
     # ids = list(range(1399, 1413))
     # job_id = '401c1750-b46e-45a4-9c72-aa042df25c7c'
 
-    app = App(base_url)
+    app = App()
 
     # model_id = app.create_model().json()['data']['id']
 
@@ -49,6 +40,6 @@ def test_dataset_create():
 ])
 def test_job_state(job_id):
 
-    app = App(base_url)
+    app = App()
     j = app.job_state(job_id).json()
     print(f'{job_id}: {j}')

@@ -55,3 +55,6 @@ def jwt_token(iss='http://192.168.103.101:9090'):
     # print(payload)
     encoded_jwt = jwt.encode(payload, open_id, algorithm="HS256")
     return encoded_jwt
+
+def model_to_dict(model):
+    return {k: getattr(model, k) for k in model.__table__.columns.keys()}

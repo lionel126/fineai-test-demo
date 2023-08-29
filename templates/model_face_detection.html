@@ -61,38 +61,26 @@
     </head>
     <body>
         <table>
-            <thead>
+            <thead class="sticky">
                 <tr>
-                    {% for k in model %}
-                    <td>{{k}}</td>
+                    <th colspan="{{ image_keys|length }}" style="text-align: left;">model: {{ model['id'] }}, name: {{ model['model_name'] }}, user: {{ model['user_id'] }}, gender: {{model['gender']}} 
+                        <br>status: {{ model['status'] }}, job_id: {{ model['job_id'] }}, birthday: {{ model['birthday'] }}</th>
+                    <th colspan="{{ job_keys|length }}" style="text-align: left;">{{job['job_kind']}}: {{ job['id'] }}<br>status: {{ job['status'] }}</th>
+                </tr>
+                <tr>
+                    {% for key in image_keys + job_keys %}
+                    <th>{{ key }}</th>
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    {% for k in model %}
-                    <td>{{ model[k] }}</td>
-                    {% endfor %}
-                </tr>
-            </tbody>
-        </table>
-
-        <table>
-            <thead>                
-                <tr>
-                    {% for k in job_keys %}
-                    <th>{{ k }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for job in jobs %}
-                <tr>
-                    {% for k in job_keys %}
-                        {% if k == "id" and job["job_kind"] in ("lora_train", "dataset_verify", "face_detection") %}
-                        <td><a href="/model/{{ model['id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>
+                {% for image in images %}
+                <tr class="{{ ['face_detection' if image['image_type'] == 'face_detection','deleted' if image['is_delete'] == True]|join(' ') }}">
+                    {% for key in  image_keys + job_keys %}
+                        {% if key not in ("url", "uploaded", "trained") %}
+                        <td class="{{ 'checked' if key=='status' and image[key] == 'checked' }}">{{ image[key] }}</td>
                         {% else %}
-                        <td> {{ job[k] }} </td>
+                        <td><img src="{{ image[key] }}" onclick="zoomImage(this)"></td>
                         {% endif %}
                     {% endfor %}
                 </tr>
