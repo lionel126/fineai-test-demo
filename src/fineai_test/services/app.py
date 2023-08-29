@@ -149,7 +149,7 @@ async def get_lora_result(job_id):
 
         combined = [{**params_images[key], **training_images[key], "txt": training_txt[key]}
                     for key in training_images]
-        combined.sort(key=lambda it: int(it.get('id', 0)))
+        combined.sort(key=lambda it: int(it.get('no', 0)))
 
         for img in combined:
             img['url'] = to_url(img['uri'])
@@ -180,13 +180,13 @@ async def get_model_lora(model_id, job_id):
     count = 0
     for image in images:
         for img in job_result['images']:
-                if img['url'] == image.url:
-                    count += 1
-                    image.uploaded = img['url']
-                    image.trained = img['trained_url'] if 'trained_url' in img else ''
-                    image.txt = img['txt'] if 'txt' in img else ''
+            if img['url'] == image.url:
+                count += 1
+                image.uploaded = img['url']
+                image.trained = img['trained_url'] if 'trained_url' in img else ''
+                image.txt = img['txt'] if 'txt' in img else ''
     assert len(job_result['images']) == count, f"{ len(job_result['images']) } == {count }"
-
+    images.sort(key=lambda it:int(it.id))
     ret = {
         "model": model,
         "job": job,
@@ -227,7 +227,7 @@ async def get_model_dataset_verify(model_id, job_id=None):
         combined = [{**ui, **params_images.get(file_name(ui['path']), {}), **result_images.get(file_name(ui['path']), {})}
                     for ui in upload_images]                
                     
-        combined.sort(key=lambda it: int(getattr(it, 'id', 0)))
+        combined.sort(key=lambda it: it['id'])
         for img in combined:
             img['url'] = to_url(img['path'])
 
@@ -268,7 +268,7 @@ async def get_model_face_detection(model_id, job_id=None):
         combined = [{**img, **params_image.get(file_name(img['path']), {}), **result_image.get(file_name(img['path']), {})} for img in upload_images]
         for img in combined:
             img['url'] = to_url(img['path'])
-
+        combined.sort(key=lambda it: it['id'])
         return {
             "model": model,
             "job": job,
