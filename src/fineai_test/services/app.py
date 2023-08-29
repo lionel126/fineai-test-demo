@@ -122,7 +122,7 @@ async def get_lora_result(job_id):
         params_images_list = [(file_name(image['uri']), image)
                                 for image in lora.params['images']]
         uri = lora.params['uri']
-        params_images_list.append((file_name(uri), {'no': '', 'uri': uri}))
+        params_images_list.append((file_name(uri), {'uri': uri}))
         params_images = dict(params_images_list)
         assert len(params_images_list) == len(params_images)
         training_images = {file_name(
