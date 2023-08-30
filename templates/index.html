@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "components/layout.html" %}
 {% block content %}
 <head>        
     <title>fineai test</title>        
@@ -18,7 +18,7 @@
             <tr>
                 {% for k in keys %}
                     {% if k == 'id' %}
-                    <td><a href="/model/{{ model[k] }}">{{ model[k] }}</a> </td>
+                    <td><a href="/model/{{ model[k] }}/jobs">{{ model[k] }}</a> </td>
                     {% else %}
                     <td> {{ model[k] }} </td>
                     {% endif %}

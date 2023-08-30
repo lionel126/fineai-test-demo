@@ -1,24 +1,8 @@
-{% extends "layout.html" %}
+{% extends "components/layout.html" %}
 {% block content %}
+{% include "components/model.html" %}
 <table>
-    <thead>
-        <tr>
-            {% for k in model %}
-            <td>{{k}}</td>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            {% for k in model %}
-            <td>{{ model[k] }}</td>
-            {% endfor %}
-        </tr>
-    </tbody>
-</table>
-
-<table>
-    <thead>                
+    <thead class="sticky">                
         <tr>
             {% for k in job_keys %}
             <th>{{ k }}</th>
@@ -29,7 +13,7 @@
         {% for job in jobs %}
         <tr>
             {% for k in job_keys %}
-                {% if k == "id" and job["job_kind"] in ("lora_train", "dataset_verify", "face_detection") %}
+                {% if k == "id" %}
                 <td><a href="/model/{{ model['id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>
                 {% else %}
                 <td> {{ job[k] }} </td>

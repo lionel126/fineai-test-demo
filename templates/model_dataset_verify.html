@@ -1,12 +1,9 @@
-{% extends "layout.html" %}
+{% extends "components/layout.html" %}
 {% block content %}
+{% include "components/model.html" %}
+{% include "components/job.html" %}
 <table>
     <thead class="sticky">
-        <tr>
-            <th colspan="{{ image_keys|length }}" style="text-align: left;">model: {{ model['id'] }}, name: {{ model['model_name'] }}, user: {{ model['user_id'] }}, gender: {{model['gender']}} 
-                <br>status: {{ model['status'] }}, job_id: {{ model['job_id'] }}, birthday: {{ model['birthday'] }}</th>
-            <th colspan="{{ job_keys|length }}" style="text-align: left;">{{job['job_kind']}}: {{ job['id'] }}<br>status: {{ job['status'] }}</th>
-        </tr>
         <tr>
             {% for key in image_keys + job_keys %}
             <th>{{ key }}</th>

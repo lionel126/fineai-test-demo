@@ -1,0 +1,28 @@
+{% extends "components/layout.html" %}
+{% block content %}
+{% include "components/model.html" %}
+{% include "components/job.html" %}
+<h3>img2img</h3>
+<table>
+    <thead class="sticky">
+        <tr>
+            {% for key in images[0].keys() %}
+            <th>{{ key }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for image in images %}
+        <tr>
+            {% for key, value in  image.items() %}
+                {% if key not in ("path") %}
+                <td>{{ value }}</td>
+                {% else %}
+                <td><img src="{{ value }}" onclick="zoomImage(this)"></td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,18 @@
+<h3>model</h3>
+<table>
+    <thead>
+        <tr>
+            {% for k in model %}
+            <th>{{k}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {% for k in model %}
+            <td>{{ model[k] }}</td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
+

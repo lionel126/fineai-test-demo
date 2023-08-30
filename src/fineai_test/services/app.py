@@ -3,7 +3,7 @@
 import logging
 from sqlalchemy import select
 from fineai_test.db import Sess
-from fineai_test.db.app import UploadImageFile, Job, UserModel
+from fineai_test.db.app import UploadImageFile, Job, UserModel, OutputImageFile
 from fineai_test.utils.utils import to_url, key_to_url, file_name, model_to_dict
 from fineai_test.utils import s3
 
@@ -45,9 +45,14 @@ async def _get_images_by_model(model_id):
         # return [row._mapping['UploadImageFile'] for row in rs.all()]
         return [row[0] for row in rs.all()]
 
+async def _get_output_images_by_job(job_id):
+    async with Sess() as sess:
+        stmt = select(OutputImageFile).where(OutputImageFile.job_id==job_id)
+        rs = await sess.execute(stmt)
+        return [row[0] for row in rs.all()]
 
 async def compare_job_results(job_id1, job_id2):
-
+    '''?'''
     async def get_result(s, job_id):
         stmt = select(Job.result).where(Job.id == job_id,
                                         Job.job_kind == 'dataset_verify')
@@ -167,11 +172,10 @@ async def get_lora_result(job_id):
         for img in combined:
             img['trained_url'] = key_to_url(img['key'], img['bucket'])
     else:
-        combined = params_images
+        combined = list(params_images.values())
     combined.sort(key=lambda it: int(it.get('no', 0)))
     for img in combined:
         img['url'] = to_url(img['uri'])
-        img['trained_url'] = key_to_url(img['key'], img['bucket'])
     return {
         "keys": ['id', 'job_kind', 'status', 'priority', 'created_time'],
         "job": lora,
@@ -199,8 +203,8 @@ async def get_model_lora(model_id, job_id):
                ) == count, f"{ len(job_result['images']) } == {count }"
     images.sort(key=lambda it: int(it.id))
     ret = {
-        "model": model,
-        "job": job,
+        "model": model_to_dict(model),
+        "job": model_to_dict(job),
         "image_keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time"],
         "job_keys": ["trained", "txt"],
         "images": images,
@@ -215,7 +219,7 @@ async def get_model_dataset_verify(model_id, job_id=None):
 
     if not job:
         return {
-            "model": model,
+            "model": model_to_dict(model),
             "images": upload_images
         }
     params_images_list = [(file_name(image['uri']), image)
@@ -249,11 +253,11 @@ async def get_model_dataset_verify(model_id, job_id=None):
     for img in combined:
         img['url'] = to_url(img['path'])
     return {
-        "model": model,
-        "job": job,
+        "model": model_to_dict(model),
+        "job": model_to_dict(job),
         "images": combined,
         "image_keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time"],
-        "job_keys": ["tolerance", "face_count", "success", "message"],
+        "job_keys": ["distance", "tolerance", "face_count", "success", "message"],
     }
 
 
@@ -264,7 +268,7 @@ async def get_model_face_detection(model_id, job_id=None):
 
     if not job:
         return {
-            "model": model,
+            "model": model_to_dict(model),
             "images": upload_images
         }
     uri = job.params['uri']
@@ -280,9 +284,21 @@ async def get_model_face_detection(model_id, job_id=None):
         img['url'] = to_url(img['path'])
     combined.sort(key=lambda it: it['id'])
     return {
-        "model": model,
-        "job": job,
+        "model": model_to_dict(model),
+        "job": model_to_dict(job),
         "images": combined,
         "image_keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time"],
         "job_keys": ["face_count", "success", "message"],
+    }
+
+async def get_model_img2img(model_id, job_id):
+    model = await _get_model(model_id)
+    job = await _get_job(job_id, kind='img2img')
+    images = await _get_output_images_by_job(job_id)
+    for img in images:
+        img.path = to_url(img.path)
+    return {
+        "model": model_to_dict(model),
+        "job": model_to_dict(job),
+        "images": [model_to_dict(img) for img in images]
     }

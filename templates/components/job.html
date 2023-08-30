@@ -1,0 +1,19 @@
+
+<h3>job</h3>
+<table>
+    <thead>
+        <tr>
+            {% for k in job %}
+            <th>{{k}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {% for k in job %}            
+            <td class="{{ 'toolong' if k in ('params', 'result') }}">{{ job[k] }}</td>            
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
+
