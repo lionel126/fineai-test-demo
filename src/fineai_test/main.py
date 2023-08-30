@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi_pagination import Page, add_pagination, paginate
+# from fastapi_pagination import Page, add_pagination, paginate
 from pydantic import BaseModel, Field
 
 from fineai_test.services.app import get_images_by_job, compare_job_results, get_model_jobs, get_model_lora, get_model_dataset_verify, get_lora_result, get_models, get_model_face_detection
@@ -14,7 +14,6 @@ templates = Jinja2Templates(directory="templates")
 class UserModel(BaseModel):
     id:int = Field(example=100)
     user_id:int = Field(examples=1)
-
 
 
 @app.get("/", response_model=UserModel)
@@ -64,7 +63,7 @@ async def model_dataset_verify(request: Request, model_id: int, job_id=None):
     return templates.TemplateResponse("model_dataset_verify.html", data)
 
 @app.get(path="/model/{model_id}/face_detection/{job_id}")
-async def model_dataset_verify(request: Request, model_id: int, job_id=None):
+async def model_face_detection(request: Request, model_id: int, job_id=None):
     ret = await get_model_face_detection(model_id, job_id)
     data = {"request": request, **ret}
     return templates.TemplateResponse("model_face_detection.html", data)

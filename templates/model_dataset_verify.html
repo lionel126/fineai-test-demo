@@ -18,7 +18,7 @@
         <tr class="{{ ['face_detection' if image['image_type'] == 'face_detection','deleted' if image['is_delete'] == True]|join(' ') }}">
             {% for key in  image_keys + job_keys %}
                 {% if key not in ("url") %}
-                <td class="{{ 'checked' if (key=='status' and image[key] == 'checked') or (key=='success' and image[key] == True) }}">{{ image[key] }}</td>
+                <td class="{{ 'checked' if (key=='status' and image[key] == 'checked') or (key=='success' and image[key] == True) }}">{{ 'N/A' if (key=='tolerance' and image['image_type']=='face_detection') else image[key] }}</td>
                 {% else %}
                 <td><img src="{{ image[key] }}" onclick="zoomImage(this)"></td>
                 {% endif %}

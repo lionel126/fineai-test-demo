@@ -2,6 +2,7 @@ import requests
 from .session import Session
 from .config import settings
 
+
 class Internal():
     def __init__(self):
         self.s = Session(settings.internal_base_url)

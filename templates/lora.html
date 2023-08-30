@@ -1,10 +1,22 @@
 {% extends "layout.html" %}
 {% block content %}
 <h3>
-    <div>status: {{ status }}</div> 
-    {% if message %}
-    <div>message: {{ message }}</div>
-    {% endif %}
+    <table>
+        <thead>
+            <tr>
+                {% for k in keys %}
+                <th>{{ k }}</th>
+                {% endfor %} 
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% for k in keys %}
+                <td>{{ job[k] }}</td>
+                {% endfor %} 
+            </tr>
+        </tbody>
+    </table>
 </h3>
 <table>
     <thead class="sticky">                
