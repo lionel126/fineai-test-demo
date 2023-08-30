@@ -1,78 +1,30 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>lora training images</title>
-        <style type="text/css">
-            table, th, td {
-                border: 1px solid black;
-                border-collapse: collapse;
-            }
-            img {
-                height: 100px;
-                transition: all 0.1s ease-in-out;
-            }
-            img.zoomed {
-                position: fixed;
-                /* 或者使用 position: absolute; */
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 9999;
-                object-fit: contain;
-                margin: auto;
-            }
-            
-            td {
-                height: 100px;
-            }
-            
-            .sticky {
-                position: sticky;
-                top: 0px;
-            }
-        </style>
-        <script>
-            function zoomImage(img) {
-                if (!img.classList.contains('zoomed')) {
-                    img.classList.add('zoomed');
-                } else {
-                    img.classList.remove('zoomed');
-                }
-            }
-    
-        </script>
-    </head>
-    <body>
-        <h3>
-            <div>status: {{ status }}</div> 
-            {% if message %}
-            <div>message: {{ message }}</div>
-            {% endif %}
-        </h3>
-        <table>
-            <thead class="sticky">                
-                <tr>
-                    <th></th>
-                    <th>uploaded</th>
-                    <th>trained</th>
-                    <th>txt</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for image in images %}                
-                <tr>                                
-                    <td>{{ image['no'] }}</td>
-                    <td><img src="{{ image['url'] }}" onclick="zoomImage(this)"></td>
-                    <td><img src="{{ image['trained_url'] }}" onclick="zoomImage(this)"></td>    
-                    <td style="max-width:1000px;word-wrap:break-word">{{ image['txt'] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% extends "layout.html" %}
+{% block content %}
+<h3>
+    <div>status: {{ status }}</div> 
+    {% if message %}
+    <div>message: {{ message }}</div>
+    {% endif %}
+</h3>
+<table>
+    <thead class="sticky">                
+        <tr>
+            <th></th>
+            <th>uploaded</th>
+            <th>trained</th>
+            <th>txt</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for image in images %}                
+        <tr>                                
+            <td>{{ image['no'] }}</td>
+            <td><img src="{{ image['url'] }}" onclick="zoomImage(this)"></td>
+            <td><img src="{{ image['trained_url'] }}" onclick="zoomImage(this)"></td>    
+            <td style="max-width:1000px;word-wrap:break-word">{{ image['txt'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-    </body>
-</html>
+{% endblock %}

@@ -70,6 +70,7 @@ async def model_dataset_verify(request: Request, model_id: int, job_id=None):
     return templates.TemplateResponse("model_face_detection.html", data)
 
 @app.get(path="/lora/{job_id}")
+@app.get(path="/lora_train/{job_id}")
 async def lora_images(request: Request, job_id: str):
     # deprecated
     ret = await get_lora_result(job_id)

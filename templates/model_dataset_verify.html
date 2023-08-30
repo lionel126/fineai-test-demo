@@ -1,91 +1,30 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>images</title>
-        <style type="text/css">
-            table, th, td {
-                border: 1px solid black;
-                border-collapse: collapse;
-            }
-            table {
-                margin-bottom: 50px;
-            }
-            img {
-                height: 100px;
-                transition: all 0.1s ease-in-out;
-            }
-            img.zoomed {
-                position: fixed;
-                /* 或者使用 position: absolute; */
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 9999;
-                object-fit: contain;
-                margin: auto;
-            }
-            tr.face_detection {
-                background-color: lightcyan;
-            }
-            td {
-                height: 100px;
-                max-width: 900px;
-                word-wrap: break-word;
-            }
-            .deleted {
-                text-decoration:line-through;
-                background-color: dimgray;
-            }
-            .checked {
-                background-color: lightgreen;
-            }
-            .sticky {
-                position: sticky;
-                top: 0px;
-            }
-        </style>
-        <script>
-            function zoomImage(img) {
-                if (!img.classList.contains('zoomed')) {
-                    img.classList.add('zoomed');
-                } else {
-                    img.classList.remove('zoomed');
-                }
-            }
-    
-        </script>
-    </head>
-    <body>
-        <table>
-            <thead class="sticky">
-                <tr>
-                    <th colspan="{{ image_keys|length }}" style="text-align: left;">model: {{ model['id'] }}, name: {{ model['model_name'] }}, user: {{ model['user_id'] }}, gender: {{model['gender']}} 
-                        <br>status: {{ model['status'] }}, job_id: {{ model['job_id'] }}, birthday: {{ model['birthday'] }}</th>
-                    <th colspan="{{ job_keys|length }}" style="text-align: left;">{{job['job_kind']}}: {{ job['id'] }}<br>status: {{ job['status'] }}</th>
-                </tr>
-                <tr>
-                    {% for key in image_keys + job_keys %}
-                    <th>{{ key }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for image in images %}
-                <tr class="{{ ['face_detection' if image['image_type'] == 'face_detection','deleted' if image['is_delete'] == True]|join(' ') }}">
-                    {% for key in  image_keys + job_keys %}
-                        {% if key not in ("url", "uploaded", "trained") %}
-                        <td class="{{ 'checked' if key=='status' and image[key] == 'checked' }}">{{ image[key] }}</td>
-                        {% else %}
-                        <td><img src="{{ image[key] }}" onclick="zoomImage(this)"></td>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </body>
-</html>
+{% extends "layout.html" %}
+{% block content %}
+<table>
+    <thead class="sticky">
+        <tr>
+            <th colspan="{{ image_keys|length }}" style="text-align: left;">model: {{ model['id'] }}, name: {{ model['model_name'] }}, user: {{ model['user_id'] }}, gender: {{model['gender']}} 
+                <br>status: {{ model['status'] }}, job_id: {{ model['job_id'] }}, birthday: {{ model['birthday'] }}</th>
+            <th colspan="{{ job_keys|length }}" style="text-align: left;">{{job['job_kind']}}: {{ job['id'] }}<br>status: {{ job['status'] }}</th>
+        </tr>
+        <tr>
+            {% for key in image_keys + job_keys %}
+            <th>{{ key }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for image in images %}
+        <tr class="{{ ['face_detection' if image['image_type'] == 'face_detection','deleted' if image['is_delete'] == True]|join(' ') }}">
+            {% for key in  image_keys + job_keys %}
+                {% if key not in ("url") %}
+                <td class="{{ 'checked' if (key=='status' and image[key] == 'checked') or (key=='success' and image[key] == True) }}">{{ image[key] }}</td>
+                {% else %}
+                <td><img src="{{ image[key] }}" onclick="zoomImage(this)"></td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

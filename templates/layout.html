@@ -1,5 +1,63 @@
 <!doctype html>
 <html>
+    <head>
+        <meta charset="UTF-8">
+        <style type="text/css">
+            table, th, td {
+                border: 1px solid black;
+                border-collapse: collapse;
+            }
+            table {
+                margin-bottom: 50px;
+            }
+            img {
+                height: 100px;
+                transition: all 0.1s ease-in-out;
+            }
+            img.zoomed {
+                position: fixed;
+                /* 或者使用 position: absolute; */
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 9999;
+                object-fit: contain;
+                margin: auto;
+            }
+            tr.face_detection {
+                background-color: lightcyan;
+            }
+            td {
+                height: 100px;
+                max-width: 900px;
+                word-wrap: break-word;
+            }
+            .deleted {
+                text-decoration:line-through;
+                background-color: dimgray;
+            }
+            .checked {
+                background-color: lightgreen;
+            }
+            .sticky {
+                position: sticky;
+                top: 0px;
+            }
+        </style>
+        <script>
+            function zoomImage(img) {
+                if (!img.classList.contains('zoomed')) {
+                    img.classList.add('zoomed');
+                } else {
+                    img.classList.remove('zoomed');
+                }
+            }
+
+        </script>
+    </head>
     <body>
     {% include 'nav.html' %}
 

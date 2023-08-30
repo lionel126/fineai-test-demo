@@ -1,103 +1,42 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>images</title>
-        <style type="text/css">
-            table, th, td {
-                border: 1px solid black;
-                border-collapse: collapse;
-            }
-            table {
-                margin-bottom: 50px;
-            }
-            img {
-                height: 100px;
-                transition: all 0.1s ease-in-out;
-            }
-            img.zoomed {
-                position: fixed;
-                /* 或者使用 position: absolute; */
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 9999;
-                object-fit: contain;
-                margin: auto;
-            }
-            tr.face_detection {
-                background-color: lightcyan;
-            }
-            td {
-                height: 100px;
-                max-width: 900px;
-                word-wrap: break-word;
-            }
-            .deleted {
-                text-decoration:line-through;
-                background-color: dimgray;
-            }
-            .checked {
-                background-color: lightgreen;
-            }
-            .sticky {
-                position: sticky;
-                top: 0px;
-            }
-        </style>
-        <script>
-            function zoomImage(img) {
-                if (!img.classList.contains('zoomed')) {
-                    img.classList.add('zoomed');
-                } else {
-                    img.classList.remove('zoomed');
-                }
-            }
-    
-        </script>
-    </head>
-    <body>
-        <table>
-            <thead>
-                <tr>
-                    {% for k in model %}
-                    <td>{{k}}</td>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    {% for k in model %}
-                    <td>{{ model[k] }}</td>
-                    {% endfor %}
-                </tr>
-            </tbody>
-        </table>
+{% extends "layout.html" %}
+{% block content %}
+<table>
+    <thead>
+        <tr>
+            {% for k in model %}
+            <td>{{k}}</td>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {% for k in model %}
+            <td>{{ model[k] }}</td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
 
-        <table>
-            <thead>                
-                <tr>
-                    {% for k in job_keys %}
-                    <th>{{ k }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for job in jobs %}
-                <tr>
-                    {% for k in job_keys %}
-                        {% if k == "id" and job["job_kind"] in ("lora_train", "dataset_verify", "face_detection") %}
-                        <td><a href="/model/{{ model['id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>
-                        {% else %}
-                        <td> {{ job[k] }} </td>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </body>
-</html>
+<table>
+    <thead>                
+        <tr>
+            {% for k in job_keys %}
+            <th>{{ k }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for job in jobs %}
+        <tr>
+            {% for k in job_keys %}
+                {% if k == "id" and job["job_kind"] in ("lora_train", "dataset_verify", "face_detection") %}
+                <td><a href="/model/{{ model['id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>
+                {% else %}
+                <td> {{ job[k] }} </td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -23,7 +23,6 @@ def test_dataset_create():
 
     job_id = app.finish_face({"imageId": image_id, "modelId": model_id}).json()[
         'data']['jobId']
-    print(f'face job: {job_id}')
 
     # dataset = os.listdir(dataset_dir)
     # fs = app.create_dataset(model_id, dataset).json()['data']

@@ -52,7 +52,6 @@ def jwt_token(iss='http://192.168.103.101:9090'):
 
     payload = {"unionId": h.encode(
         user_id), "sub": sub, "iss": iss, "login_user_key": login_user_key}
-    # print(payload)
     encoded_jwt = jwt.encode(payload, open_id, algorithm="HS256")
     return encoded_jwt
 
