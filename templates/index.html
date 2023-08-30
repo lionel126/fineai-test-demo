@@ -15,7 +15,7 @@
         </thead>
         <tbody>
             {% for model in models %}
-            <tr>
+            <tr class="{{ 'deleted' if model['is_delete'] == True else ''}}">
                 {% for k in keys %}
                     {% if k == 'id' %}
                     <td><a href="/model/{{ model[k] }}/jobs">{{ model[k] }}</a> </td>

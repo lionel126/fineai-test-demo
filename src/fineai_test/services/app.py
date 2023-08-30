@@ -300,5 +300,6 @@ async def get_model_img2img(model_id, job_id):
     return {
         "model": model_to_dict(model),
         "job": model_to_dict(job),
+        "keys": ["id", "job_id", "image_type", "path", "hd_id", "status", "is_delete", "updated_time", "created_time"],
         "images": [model_to_dict(img) for img in images]
     }
