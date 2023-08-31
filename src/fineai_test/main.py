@@ -20,8 +20,14 @@ class UserModel(BaseModel):
     user_id: int = Field(examples=1)
 
 
-@app.get("/", response_model=UserModel)
-async def root(request: Request):
+# @app.get("/")
+# async def root(request:Request):
+#     data = {"request": request}
+#     return templates.TemplateResponse("index.html", data)
+
+@app.get("/")
+@app.get("/models")
+async def models(request: Request):
     # s, stmt = await get_models_pagination()
     # return paginate(s, stmt)
     size = int(request.query_params.get('size', 200))
@@ -30,7 +36,7 @@ async def root(request: Request):
         'request': request,
         **await get_models(size, page)
     }
-    return templates.TemplateResponse("index.html", data)
+    return templates.TemplateResponse("models.html", data)
 
 
 @app.get(path="/compare/{job_id1}/vs/{job_id2}", response_class=HTMLResponse)

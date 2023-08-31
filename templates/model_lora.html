@@ -21,7 +21,9 @@
                 {% if key in ("url", "uploaded", "trained") %}
                 <td><img src="{{ image[key] }}" onclick="zoomImage(this)"></td>
                 {% elif key == "job_id" %}
-                <td><a href="/model/{{ model['id'] }}/{{ image['image_type'] }}/{{ image['job_id'] }}">{{ image[key] }}</a></td>
+                <td><a href="/model/{{ model['id'] }}/{{ image['image_type'] }}/{{ image[key] }}">{{ image[key] }}</a></td>
+                {% elif key == "id" %}
+                <td id="{{ image[key] }}"><a href="#{{ image[key] }}">{{ image[key] }}</a></td>
                 {% else %}
                 <td class="{{ 'checked' if key=='status' and image[key] == 'checked' }}">{{ image[key] }}</td>
                 {% endif %}
