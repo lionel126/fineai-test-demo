@@ -18,10 +18,12 @@
         {% for image in images %}
         <tr class="{{ ['face_detection' if image['image_type'] == 'face_detection','deleted' if image['is_delete'] == True]|join(' ') }}">
             {% for key in  image_keys + job_keys %}
-                {% if key not in ("url", "uploaded", "trained") %}
-                <td class="{{ 'checked' if key=='status' and image[key] == 'checked' }}">{{ image[key] }}</td>
-                {% else %}
+                {% if key in ("url", "uploaded", "trained") %}
                 <td><img src="{{ image[key] }}" onclick="zoomImage(this)"></td>
+                {% elif key == "job_id" %}
+                <td><a href="/model/{{ model['id'] }}/{{ image['image_type'] }}/{{ image['job_id'] }}">{{ image[key] }}</a></td>
+                {% else %}
+                <td class="{{ 'checked' if key=='status' and image[key] == 'checked' }}">{{ image[key] }}</td>
                 {% endif %}
             {% endfor %}
         </tr>
