@@ -1,19 +1,22 @@
 import face_recognition
 from fineai_test.utils.utils import to_url, jwt_token
 
-def test_url():
-    print(to_url("vs3://cn-beijing/fineai-test/xw-dev/upload/8/61/dataset_verify/b4919ada-7bec-4641-a99a-cbb33c187ca2.jpeg"))
-
-def test_jwt():    
-    jwt_token()
-
 
 def test_compare():
-    im1 = face_recognition.load_image_file('/Users/chensg/Pictures/Alexandra Daddario/1b7131abe7284690a1e349878a5eeaae.bmp')
-    im2 = face_recognition.load_image_file('/Users/chensg/Pictures/Alexandra Daddario/6MM4MAHRVFMEPLJYQHVTH5WCPI.jpg')
-    known = face_recognition.face_encodings(im1)
-    to_check = face_recognition.face_encodings(im2)[0]
-    ret = face_recognition.compare_faces(known, to_check)
-    print(ret)
-    distance = face_recognition.face_distance(known, to_check)[0]
+    pics =  [
+        '/Users/chensg/Downloads/60f6998a-3fd5-4bc0-9827-bae3312fea61.png',
+        '/Users/chensg/Downloads/a41c6b26-1adf-45c3-b24d-38940b0badda.jpeg',
+        # '/Users/chensg/Pictures/Alexandra Daddario/0457f991c5d17bde63a10a18ad56052a.jpg', 
+        # '/Users/chensg/Pictures/Alexandra Daddario/1b7131abe7284690a1e349878a5eeaae.bmp',
+        # '/Users/chensg/Pictures/Alexandra Daddario/6MM4MAHRVFMEPLJYQHVTH5WCPI.jpg'
+    ]
+    encodings = []
+    for p in pics:
+        im = face_recognition.load_image_file(p)
+        encodings.append(face_recognition.face_encodings(im)[0])
+    
+    
+    ret = face_recognition.compare_faces(encodings, encodings[0])
+    print(f'{ret=}')
+    distance = face_recognition.face_distance(encodings, encodings[0])
     print(f'{distance=}')

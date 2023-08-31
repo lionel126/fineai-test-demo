@@ -1,25 +1,14 @@
-<!DOCTYPE html>
-<html>
-
+{% extends "components/layout.html" %}
+{% block content %}
 <head>
-    <meta charset="UTF-8">
     <title>对比结果</title>
     <style type="text/css">
-        table, th, td {
-            border: 1px solid black;
-            border-collapse: collapse;
-        }
-        th {
-            height: 30px;
-        }
+        
         .xx {
             width: 100px;
         }
         tr.different {
             background-color: lightsalmon;
-        }
-        td {
-            height: 100px;
         }
         table#job1_list {
             float: left;
@@ -27,36 +16,11 @@
         table#job2_list {
             margin-left: 100px;
             float: left;
-        }
-
-        .sticky {
-            position: sticky;
-            top: 0px;
-        }
-
-        img {
-            height: 100%;
-            transition: all 0.5s ease-in-out;
-        }
-
-        img.zoomed {
-            position: fixed;
-            /* 或者使用 position: absolute; */
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: 80%;
-            height: 80%;
-            z-index: 9999;
-            object-fit: contain;
-            margin: auto;
-        }
-        
+        }        
     </style>
 </head>
 
-<body>
+
     <table id="vs_list">
         <thead class="sticky">
             <tr>
@@ -125,16 +89,4 @@
             {% endfor %}
         </tbody>            
     </table>
-    <script>
-        function zoomImage(img) {
-            if (!img.classList.contains('zoomed')) {
-                img.classList.add('zoomed');
-            } else {
-                img.classList.remove('zoomed');
-            }
-        }
-
-    </script>
-</body>
-
-</html>
+{% endblock %}
