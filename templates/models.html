@@ -1,12 +1,12 @@
 {% extends "components/layout.html" %}
 {% block content %}
 <head>        
-    <title>fineai test</title>        
+    <title>models</title>        
 </head>
-<h3>model list</h3>
+<h3>models</h3>
 <body>
     <table>
-        <thead>                
+        <thead class="sticky">                
             <tr>
                 {% for k in keys %}
                 <th>{{ k }}</th>

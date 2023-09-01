@@ -20,3 +20,7 @@ def test_compare():
     print(f'{ret=}')
     distance = face_recognition.face_distance(encodings, encodings[0])
     print(f'{distance=}')
+
+def test_setting():
+    from fineai_test.config import settings
+    

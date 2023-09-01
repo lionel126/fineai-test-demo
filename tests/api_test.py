@@ -1,35 +1,44 @@
 import os
+import time
 import pytest
 from api.app import App, upload
 
-def test_dataset_create():
-    file = '/Users/chensg/Pictures/6094e19d8f146.jpeg'
+face = '/Users/chensg/Pictures/scarlettJohansson/R.jpeg'
+# face = '/Users/chensg/Pictures/scarlettJohansson/R (3).jpeg'
+file_dir = '/Users/chensg/Pictures/scarlettJohansson'
 
-    model_id = 78
-    # image_id = 1384
-    # ids = list(range(1399, 1413))
-    # job_id = '401c1750-b46e-45a4-9c72-aa042df25c7c'
+# file_dir = '/Users/chensg/Pictures/Alexandra Daddario'
+# file_dir = '/Users/chensg/Pictures/americanCaptain'
+files = [os.path.join(file_dir, f) for f in os.listdir(file_dir)]
 
-    app = App()
+@pytest.mark.parametrize('user, face, dataset', [
+    ('b', files[14], files),
+])
+def test_train(user, face, dataset):
 
-    # model_id = app.create_model().json()['data']['id']
+    app = App(user)
 
-    json = {"modelId": model_id, "fileName": file.split('/')[-1]}
+    model_id = app.create_model().json()['data']['id']
+
+    json = {"modelId": model_id, "fileName": face.split('/')[-1]}
     data = app.create_face(json).json()['data']
     image_id = data['id']
-    upload(file, data['host'], data['uploadParam'])
+    upload(face, data['host'], data['uploadParam'])
 
     job_id = app.finish_face({"imageId": image_id, "modelId": model_id}).json()[
         'data']['jobId']
 
-    # dataset = os.listdir(dataset_dir)
-    # fs = app.create_dataset(model_id, dataset).json()['data']
-    # ids = []
-    # for f in fs:
-    #     upload(os.path.join(dataset_dir, f['fileName']), f['host'], f['uploadParam'])
-    #     ids.append(f['id'])
-    # job_id = app.finish_dataset(model_id, ids).json()['data']['jobId']
-    # print(f'dataset job: {job_id}')
+    fs = app.create_dataset(model_id, dataset).json()['data']
+    ids = []
+    for f in fs:
+        upload(f['fileName'], f['host'], f['uploadParam'])
+        ids.append(f['id'])
+    job_id = app.finish_dataset(model_id, ids).json()['data']['jobId']
+    print(f'dataset job: {job_id}')
+    app.update_model(id=model_id, modelName=f'{model_id}-Scarlett')
+    while app.job_state(job_id).json()['data']['status'] != 'success':
+        time.sleep(1)
+    app.train(model_id)
 
 
 @pytest.mark.parametrize('job_id', [

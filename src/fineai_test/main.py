@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -9,15 +10,23 @@ from fineai_test.services.app import get_images_by_job, compare_job_results, \
     get_lora_result, get_models, get_model_face_detection, \
     get_model_img2img
 
+
+logging.basicConfig(
+    # format='%(asctime)s %(levelname)s %(module)s:%(lineno)d - %(message)s',
+    format='%(asctime)s %(levelname)s %(name)s %(module)s:%(lineno)d - %(message)s',
+    force=True,
+)
+logging.getLogger().setLevel(logging.DEBUG)
+
 app = FastAPI()
 
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
-class UserModel(BaseModel):
-    id: int = Field(example=100)
-    user_id: int = Field(examples=1)
+# class UserModel(BaseModel):
+#     id: int = Field(example=100)
+#     user_id: int = Field(examples=1)
 
 
 # @app.get("/")

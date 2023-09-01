@@ -1,7 +1,10 @@
+import logging
 from hashids import Hashids
 import hashlib
 import jwt
+from fineai_test.config import settings
 
+log = logging.getLogger(__name__)
 
 def to_url(s3uri: str):
     if 'fineai-test' in s3uri:
@@ -36,24 +39,27 @@ def key_to_url(key, bucket='fineai-test'):
         return f'https://fineai-secure0.xpccdn.com/{key}~tplv-5x3rixm6so-watermark-v1:0:0:q100.image'
 
 
-def jwt_token(iss='http://192.168.103.101:9090'):
-    user_id = 1
-    open_id = 'csgoA_WQ63tqac75U0iL6tIUWYQhmow'
-    union_id = 'csgoIRU76zO7uMhAy3wCV0Y49F5De5k'
-    # :csgoIRU76zO7uMhAy3wCV0Y49F5De5k:csgoA_WQ63tqac75U0iL6tIUWYQhmow'
-    app_id = 'wxee64f42a910fe3e6'
+def jwt_token(uid, iss='http://192.168.103.101:9090'):
+    # user_id = 1
+    # open_id = 'csgoA_WQ63tqac75U0iL6tIUWYQhmow'
+    # union_id = 'csgoIRU76zO7uMhAy3wCV0Y49F5De5k'
+    # app_id = 'wxee64f42a910fe3e6'
+
+    user = settings.get_usr(uid)
 
     login_user_key = hashlib.md5(
-        bytes(f'{app_id}:{union_id}:{open_id}', 'utf-8')).digest().hex()
+        bytes(f'{user.app_id}:{user.union_id}:{user.open_id}', 'utf-8')).digest().hex()
     sub = "XW IT Co."
     # exp = datetime.now()
     salt = 'xinPC_MA@2023'
     h = Hashids(salt=salt, min_length=16)
 
     payload = {"unionId": h.encode(
-        user_id), "sub": sub, "iss": iss, "login_user_key": login_user_key}
-    encoded_jwt = jwt.encode(payload, open_id, algorithm="HS256")
+        user.user_info_id), "sub": sub, "iss": iss, "login_user_key": login_user_key}
+    log.debug(f'{user}, {payload=}, {user.open_id=}')
+    encoded_jwt = jwt.encode(payload, user.open_id, algorithm="HS256")
     return encoded_jwt
+
 
 def model_to_dict(model):
     return {k: getattr(model, k) for k in model.__table__.columns.keys()}

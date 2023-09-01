@@ -52,26 +52,14 @@ async def _get_output_images_by_job(job_id):
         return [row[0] for row in rs.all()]
 
 async def compare_job_results(job_id1, job_id2):
-    '''?'''
-    async def get_result(s, job_id):
-        stmt = select(Job.result).where(Job.id == job_id,
-                                        Job.job_kind == 'dataset_verify')
-        rs = await s.execute(stmt)
-        if row := rs.one_or_none():
-            return row[0]['extras'] if row[0] else {}
-        return {}
-
-    async with Sess() as sess:
-        # tasks = []
-        # for job_id in (job_id1, job_id2):
-        #     tasks.append(get_result(sess, job_id))
-        # job1, job2 = await asyncio.gather(*tasks)
-        j1 = await get_result(sess, job_id1)
-        j2 = await get_result(sess, job_id2)
-        job1_uri = to_url(j1['uri']['uri']) if j1 else ""
-        job2_uri = to_url(j2['uri']['uri']) if j2 else ""
-        job1_images = {ret['no']: ret for ret in j1['images']} if j1 else {}
-        job2_images = {ret['no']: ret for ret in j2['images']} if j2 else {}
+    job1 = await _get_job(job_id1, 'dataset_verify')
+    job2 = await _get_job(job_id2, 'dataset_verify') 
+    j1 = job1.result['extras']
+    j2 = job2.result['extras']
+    job1_uri = to_url(j1['uri']['uri']) if job1.status == 'success' else to_url(j1['uri'])
+    job2_uri = to_url(j2['uri']['uri']) if job2.status == 'success' else to_url(j2['uri'])
+    job1_images = {ret['no']: ret for ret in j1['images']} if j1 else {}
+    job2_images = {ret['no']: ret for ret in j2['images']} if j2 else {}
 
     vs_set = set(job1_images) & set(job2_images)
     job1_set = set(job1_images) - set(job2_images)
@@ -88,6 +76,7 @@ async def compare_job_results(job_id1, job_id2):
     for j in job2_list:
         j['uri'] = to_url(j['uri'])
     return {
+        "keys": ['no', 'message', 'distance'],
         "job1_uri": job1_uri,
         "job2_uri": job2_uri,
         "vs_list": vs_list,
@@ -122,9 +111,12 @@ async def get_model_jobs(model_id):
         return ret
 
 
-async def _get_job(job_id, kind):
+async def _get_job(job_id, kind=None):
     async with Sess() as sess:
-        stmt = select(Job).where(Job.id == job_id, Job.job_kind == kind)
+        if kind:
+            stmt = select(Job).where(Job.id == job_id, Job.job_kind == kind)
+        else:
+            stmt = select(Job).where(Job.id == job_id)
         rs = (await sess.execute(stmt)).one_or_none()
     return rs[0]
 
