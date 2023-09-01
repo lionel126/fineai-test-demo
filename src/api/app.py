@@ -26,6 +26,11 @@ class App():
         return self.s.post('/app/user/model/create')
     
     def create_face(self, json):
+        '''json: default = {
+            "modelId": 0, 
+            "fileName": ""
+        }
+        '''
         return self.s.post('/app/user/model/face/create', json=json) 
     
     def finish_face(self, json):
