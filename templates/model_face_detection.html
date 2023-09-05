@@ -24,8 +24,12 @@
                 <td><a href="/model/{{ model['id'] }}/{{ image['image_type'] }}/{{ image[key] }}">{{ image[key] }}</a></td>
                 {% elif key == "id" %}
                 <td id="{{ image[key] }}"><a href="#{{ image[key] }}">{{ image[key] }}</a></td>
+                {% elif key == "status" %}
+                <td class="{{ image[key] }}">{{ image[key] }}</td>
+                {% elif key == "success" %}
+                <td class="{{ image[key] }}">{{ image[key] }}</td>
                 {% else %}
-                <td class="{{ 'checked' if (key=='status' and image[key] == 'checked') or (key=='success' and image[key] == True) }}">{{ image[key] }}</td>
+                <td>{{ image[key] }}</td>
                 {% endif %}
             {% endfor %}
         </tr>

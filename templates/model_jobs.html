@@ -15,12 +15,12 @@
     </thead>
     <tbody>
         {% for job in jobs %}
-        <tr>
+        <tr class="{{ 'delete' if job['is_delete'] == True }}">
             {% for k in job_keys %}
                 {% if k == "id" %}
                 <td><a href="/model/{{ model['id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>
                 {% else %}
-                <td> {{ job[k] }} </td>
+                <td class="{{ job[k] if k=='status' }}">{{ job[k] }}</td>
                 {% endif %}
             {% endfor %}
         </tr>

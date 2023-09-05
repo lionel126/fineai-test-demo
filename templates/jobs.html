@@ -1,0 +1,33 @@
+{% extends "components/layout.html" %}
+{% block content %}
+<head>        
+    <title>jobs</title>        
+</head>
+<h3>jobs</h3>
+<body>
+    <table>
+        <thead class="sticky">                
+            <tr>
+                {% for k in keys %}
+                <th>{{ k }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr class="{{ 'deleted' if job['is_delete'] == True}}">
+                {% for k in keys %}
+                    {% if k == 'id' %}
+                    <td><a href="/model/{{ job['user_model_id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>
+                    {% elif k == 'status' %}
+                    <td class="{{ job[k] }}">{{ job[k] }}</td>
+                    {% else %}
+                    <td class="{{ 'text2long' if k in ('params', 'result') }}">{{ job[k] }}</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+{% endblock %}

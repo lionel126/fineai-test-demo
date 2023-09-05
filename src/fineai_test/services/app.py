@@ -300,7 +300,7 @@ async def get_model_img2img(model_id, job_id):
     }
 
 
-async def get_output(size=20, page=1):
+async def get_outputs(size=20, page=1):
     async with Sess() as sess:
         stmt_job = select(UserJobImage).order_by(
             UserJobImage.created_time.desc(), UserJobImage.id).offset(size * (page - 1)).limit(size)
@@ -308,9 +308,9 @@ async def get_output(size=20, page=1):
         stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs)).order_by(case({job_id: index for index, job_id in enumerate(jobs)}, value=OutputImageFile.job_id))
         images = [model_to_dict(row[0]) for row in (await sess.execute(stmt_images)).all()]
         ret = {}
+        for job_id, job in jobs.items():
+            ret[job_id] = job
         for img in images:
-            if img['job_id'] not in ret:
-                ret[img['job_id']] = jobs[img['job_id']]
             if 'images' not in ret[img['job_id']]:
                 ret[img['job_id']]['images'] = []
             img['url'] = to_url(img['path'])
@@ -321,3 +321,17 @@ async def get_output(size=20, page=1):
             "job_keys": ["id", "user_model_id",	"image_type", "show_name", "updated_time", "created_time", "is_delete",	"status"],
             "rows": result
         }
+
+
+async def get_jobs(size=200, page=1):
+    async with Sess() as sess:
+        stmt = select(Job).order_by(Job.created_time.desc()).limit(size).offset((page - 1) * size)
+        rs = (await sess.execute(stmt)).all()
+
+    jobs = [model_to_dict(r[0]) for r in rs]
+
+    keys = jobs[0].keys() if jobs else []
+    return {
+        'keys': keys,
+        'jobs': jobs
+    }

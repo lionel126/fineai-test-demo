@@ -7,6 +7,12 @@ from api.app import App, upload
 scarlett_dir = '/Users/chensg/Pictures/scarlettJohansson'
 daddario_dir = '/Users/chensg/Pictures/Alexandra Daddario'
 captain_dir = '/Users/chensg/Pictures/americanCaptain'
+guoda_dir = '/Users/chensg/Pictures/guoda'
+jason_dir = '/Users/chensg/Pictures/JasonStatham'
+
+images_scarlett = [os.path.join(scarlett_dir, f) for f in os.listdir(scarlett_dir)]
+images_daddario = [os.path.join(daddario_dir, f) for f in os.listdir(daddario_dir)]
+images_jason = [os.path.join(jason_dir, f) for f in os.listdir(jason_dir)]
 
 face_ext_heif = '/Users/chensg/Pictures/scarlettJohansson/379.heif'
 face_ext_avif = '/Users/chensg/Pictures/hero.avif' # not supported file format
@@ -14,16 +20,15 @@ face_not_human = '/Users/chensg/Downloads/891.jpg'
 face_too_many = '/Users/chensg/Pictures/scarlettJohansson/marvel-scarlett-johansson-zoe-saldana-dave-bautista-done-with-mcu.jpg'
 face_scarlett2 = '/Users/chensg/Pictures/scarlettJohansson/R (4).jpeg'
 face_scarlett = '/Users/chensg/Pictures/scarlettJohansson/R.jpeg'
-face_daddario_random = os.path.join(daddario_dir, os.listdir(daddario_dir)[random.randint(0, len(os.listdir(daddario_dir))-1)])
+face_daddario_random = images_daddario[random.randint(0, len(images_daddario) - 1)]
+face_jason_random = images_jason[random.randint(0, len(images_jason) - 1)]
 
 error_files = [face_ext_avif, face_not_human, face_too_many]
-images_scarlett = [os.path.join(scarlett_dir, f) for f in os.listdir(scarlett_dir)]
-images_daddario = [os.path.join(daddario_dir, f) for f in os.listdir(daddario_dir)]
-
 
 @pytest.mark.parametrize('user, model_id, face, dataset, update, train', [
     # ('c', None, face_scarlett2, images_scarlett, {'modelName': 'scar'}, True),
-    ('c', None, face_daddario_random, images_daddario, False, True),
+    ('c', 408, face_daddario_random, images_daddario, {'modelName': 'daddario'}, True),
+    # ('c', 406, face_jason_random, images_jason, {'modelName': 'guo'}, True),
     # ('b', 342, None, None, None, True),
     # ('c', None, face_scarlett, images_scarlett, None, True),
     # ('c', None, face_daddario_random, images_daddario, None, True),

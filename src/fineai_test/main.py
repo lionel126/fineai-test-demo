@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fineai_test.services.app import get_images_by_job, compare_job_results, \
     get_model_jobs, get_model_lora, get_model_dataset_verify, \
     get_lora_result, get_models, get_model_face_detection, \
-    get_model_img2img, get_output
+    get_model_img2img, get_outputs, get_jobs
 
 app = FastAPI()
 
@@ -102,6 +102,14 @@ async def img2img(request: Request, model_id: int, job_id: str):
 async def outputs(request: Request):
     size = int(request.query_params.get('size', 50))
     page = int(request.query_params.get('page', 1))
-    ret = await get_output(size=size, page=page)
+    ret = await get_outputs(size=size, page=page)
     data = {"request": request, **ret}
     return templates.TemplateResponse("outputs.html", data)
+
+@app.get(path='/jobs')
+async def jobs(request: Request):
+    size = int(request.query_params.get('size', 50))
+    page = int(request.query_params.get('page', 1))
+    ret = await get_jobs(size=size, page=page)
+    data = {"request": request, **ret}
+    return templates.TemplateResponse("jobs.html", data)
