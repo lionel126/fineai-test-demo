@@ -303,7 +303,7 @@ async def get_model_img2img(model_id, job_id):
 async def get_output(size=20, page=1):
     async with Sess() as sess:
         stmt_job = select(UserJobImage).order_by(
-            UserJobImage.created_time.desc(), UserJobImage.id).offset(size * page).limit(size)
+            UserJobImage.created_time.desc(), UserJobImage.id).offset(size * (page - 1)).limit(size)
         jobs = {row[0].id: model_to_dict(row[0]) for row in (await sess.execute(stmt_job)).all()}
         stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs)).order_by(case({job_id: index for index, job_id in enumerate(jobs)}, value=OutputImageFile.job_id))
         images = [model_to_dict(row[0]) for row in (await sess.execute(stmt_images)).all()]

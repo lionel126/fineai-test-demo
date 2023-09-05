@@ -1,4 +1,3 @@
-import requests
 from urllib.parse import urlparse
 
 from fineai_test.utils.utils import jwt_token

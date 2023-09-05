@@ -22,13 +22,14 @@ images_daddario = [os.path.join(daddario_dir, f) for f in os.listdir(daddario_di
 
 
 @pytest.mark.parametrize('user, model_id, face, dataset, update, train', [
-    # ('c', None, face_file, files, False, False),
+    # ('c', None, face_scarlett2, images_scarlett, {'modelName': 'scar'}, True),
+    ('c', None, face_daddario_random, images_daddario, False, True),
     # ('b', 342, None, None, None, True),
     # ('c', None, face_scarlett, images_scarlett, None, True),
     # ('c', None, face_daddario_random, images_daddario, None, True),
     # ('c', None, face_daddario_random, images_daddario, {'gender': 'male'}, True),
     # ('c', None, face_daddario_random, images_daddario, None, False),
-    ('b', None, face_scarlett2, None, None, False),
+    # ('b', None, face_scarlett2, None, None, False),
 ])
 def test_train(user:str|None, model_id:int|None, face:str|None, dataset:list[str]|None, update:dict|None, train:bool):
 
