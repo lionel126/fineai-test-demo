@@ -88,7 +88,7 @@ class App():
         path = f'/app/theme/detail/{theme_id}'
         return self.s.get(path)
     
-    def output_po(self, json=None, **kw):
+    def output_portray(self, json=None, **kw):
         '''json: default = {
             "modelId": 0,
             "themeId": 0,
@@ -109,7 +109,7 @@ class App():
         return self.s.get(path)
 
     def subscribe(self):
-        '''need to call wx api
+        '''need to call wx api first, then call server. or wont manage to send notification 
         json: {
             "key": "9ce51182-eb1a-479d-8a13-b00fc01c2e65",
             "location": "image",

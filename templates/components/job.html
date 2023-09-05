@@ -13,8 +13,10 @@
             {% for k in job %}
                 {% if k == 'user_model_id' %}
                 <td><a href="/model/{{job[k]}}/jobs">{{job[k]}}</td>
+                {% elif k in ('params', 'result') %}
+                <td class="text2long">{{ job[k]|tojson }}</td>
                 {% else %}
-                <td class="{{ 'text2long' if k in ('params', 'result') }}">{{ job[k] }}</td>
+                <td>{{ job[k] }}</td>
                 {% endif %}
             {% endfor %}
         </tr>

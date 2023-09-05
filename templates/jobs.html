@@ -21,8 +21,10 @@
                     <td><a href="/model/{{ job['user_model_id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>
                     {% elif k == 'status' %}
                     <td class="{{ job[k] }}">{{ job[k] }}</td>
+                    {% elif k in ('params', 'result') %}
+                    <td class="text2long">{{ job[k]|tojson }}</td>
                     {% else %}
-                    <td class="{{ 'text2long' if k in ('params', 'result') }}">{{ job[k] }}</td>
+                    <td>{{ job[k] }}</td>
                     {% endif %}
                 {% endfor %}
             </tr>

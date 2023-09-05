@@ -25,9 +25,10 @@ face_jason_random = images_jason[random.randint(0, len(images_jason) - 1)]
 
 error_files = [face_ext_avif, face_not_human, face_too_many]
 
+
 @pytest.mark.parametrize('user, model_id, face, dataset, update, train', [
     # ('c', None, face_scarlett2, images_scarlett, {'modelName': 'scar'}, True),
-    ('c', 408, face_daddario_random, images_daddario, {'modelName': 'daddario'}, True),
+    ('c', 421, face_scarlett, images_daddario, {'modelName': 'daddario'}, False),
     # ('c', 406, face_jason_random, images_jason, {'modelName': 'guo'}, True),
     # ('b', 342, None, None, None, True),
     # ('c', None, face_scarlett, images_scarlett, None, True),
@@ -81,6 +82,16 @@ def test_train(user:str|None, model_id:int|None, face:str|None, dataset:list[str
 
     if train:
         app.train(model_id)
+
+
+@pytest.mark.parametrize('user, model_id', [
+    ('c', 413),
+])
+def test_output(user, model_id):
+    app = App(user)
+    theme_id = random.choice(app.theme_list().json()['data'])['id']
+    theme_model_id = random.choice(app.theme_detail(theme_id).json()['data']['modelList'])['id']
+    app.output_portray(modelId=model_id, themeId=theme_id, themeModelId=theme_model_id)
 
 
 @pytest.mark.parametrize('job_id', [
