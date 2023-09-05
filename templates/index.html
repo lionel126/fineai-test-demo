@@ -1,5 +1,12 @@
 {% extends "components/layout.html" %}
 {% block content %}
-{{debug}}
-{{desc}}
+<head>
+    <script>
+        function redirect() {
+            window.location.href='/models'
+        }
+        setTimeout(redirect, 1000)
+    </script>
+</head>
+<div>redirecting...</div>
 {% endblock %}

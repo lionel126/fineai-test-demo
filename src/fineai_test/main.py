@@ -22,8 +22,7 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
 async def root(request:Request):
-    
-    data = {"request": request, "desc": app.description, "debug": app.debug}
+    data = {"request": request}
     return templates.TemplateResponse("index.html", data)
 
 
