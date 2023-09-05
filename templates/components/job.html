@@ -10,8 +10,12 @@
     </thead>
     <tbody>
         <tr>
-            {% for k in job %}            
-            <td class="{{ 'toolong' if k in ('params', 'result') }}">{{ job[k] }}</td>            
+            {% for k in job %}
+                {% if k == 'user_model_id' %}
+                <td><a href="/model/{{job[k]}}/jobs">{{job[k]}}</td>
+                {% else %}
+                <td class="{{ 'text2long' if k in ('params', 'result') }}">{{ job[k] }}</td>
+                {% endif %}
             {% endfor %}
         </tr>
     </tbody>

@@ -1,22 +1,13 @@
-import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 # from fastapi_pagination import Page, add_pagination, paginate
-from pydantic import BaseModel, Field
+# from pydantic import BaseModel, Field
 
 from fineai_test.services.app import get_images_by_job, compare_job_results, \
     get_model_jobs, get_model_lora, get_model_dataset_verify, \
     get_lora_result, get_models, get_model_face_detection, \
-    get_model_img2img
-
-
-logging.basicConfig(
-    # format='%(asctime)s %(levelname)s %(module)s:%(lineno)d - %(message)s',
-    format='%(asctime)s %(levelname)s %(name)s %(module)s:%(lineno)d - %(message)s',
-    force=True,
-)
-logging.getLogger().setLevel(logging.DEBUG)
+    get_model_img2img, get_output
 
 app = FastAPI()
 
@@ -29,12 +20,13 @@ templates = Jinja2Templates(directory="templates")
 #     user_id: int = Field(examples=1)
 
 
-# @app.get("/")
-# async def root(request:Request):
-#     data = {"request": request}
-#     return templates.TemplateResponse("index.html", data)
-
 @app.get("/")
+async def root(request:Request):
+    
+    data = {"request": request, "desc": app.description, "debug": app.debug}
+    return templates.TemplateResponse("index.html", data)
+
+
 @app.get("/models")
 async def models(request: Request):
     # s, stmt = await get_models_pagination()
@@ -105,3 +97,12 @@ async def img2img(request: Request, model_id: int, job_id: str):
     ret = await get_model_img2img(model_id, job_id)
     data = {"request": request, **ret}
     return templates.TemplateResponse("model_img2img.html", data)
+
+
+@app.get(path='/outputs')
+async def outputs(request: Request):
+    size = int(request.query_params.get('size', 50))
+    page = int(request.query_params.get('page', 1))
+    ret = await get_output(size=size, page=page)
+    data = {"request": request, **ret}
+    return templates.TemplateResponse("outputs.html", data)

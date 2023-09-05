@@ -1,4 +1,4 @@
-
+import logging
 from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
@@ -39,5 +39,7 @@ class Settings(BaseSettings):
 
     def get_usr(self, uid:str):
         return self.usr.get(uid)
+    
+    log_level: int = logging.DEBUG
 
 settings = Settings()

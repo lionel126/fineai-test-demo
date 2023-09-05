@@ -59,7 +59,7 @@ class App():
     
     def update_model(self, json=None, **kw):
         '''json: default = {
-                "birthday": "2003-09-01",
+                "birthday": "2014-09-01",
                 "gender": "female",
                 "id": 0,
                 "modelName": "Daddario"

@@ -1,9 +1,7 @@
-# from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-# import asyncio
 import logging
-from sqlalchemy import select
+from sqlalchemy import select, case
 from fineai_test.db import Sess
-from fineai_test.db.app import UploadImageFile, Job, UserModel, OutputImageFile
+from fineai_test.db.app import UploadImageFile, Job, UserModel, OutputImageFile, UserJobImage
 from fineai_test.utils.utils import to_url, key_to_url, file_name, model_to_dict
 from fineai_test.utils import s3
 
@@ -45,19 +43,23 @@ async def _get_images_by_model(model_id):
         # return [row._mapping['UploadImageFile'] for row in rs.all()]
         return [row[0] for row in rs.all()]
 
+
 async def _get_output_images_by_job(job_id):
     async with Sess() as sess:
-        stmt = select(OutputImageFile).where(OutputImageFile.job_id==job_id)
+        stmt = select(OutputImageFile).where(OutputImageFile.job_id == job_id)
         rs = await sess.execute(stmt)
         return [row[0] for row in rs.all()]
 
+
 async def compare_job_results(job_id1, job_id2):
     job1 = await _get_job(job_id1, 'dataset_verify')
-    job2 = await _get_job(job_id2, 'dataset_verify') 
+    job2 = await _get_job(job_id2, 'dataset_verify')
     j1 = job1.result['extras']
     j2 = job2.result['extras']
-    job1_uri = to_url(j1['uri']['uri']) if job1.status == 'success' else to_url(j1['uri'])
-    job2_uri = to_url(j2['uri']['uri']) if job2.status == 'success' else to_url(j2['uri'])
+    job1_uri = to_url(
+        j1['uri']['uri']) if job1.status == 'success' else to_url(j1['uri'])
+    job2_uri = to_url(
+        j2['uri']['uri']) if job2.status == 'success' else to_url(j2['uri'])
     job1_images = {ret['no']: ret for ret in j1['images']} if j1 else {}
     job2_images = {ret['no']: ret for ret in j2['images']} if j2 else {}
 
@@ -283,6 +285,7 @@ async def get_model_face_detection(model_id, job_id=None):
         "job_keys": ["face_count", "success", "message"],
     }
 
+
 async def get_model_img2img(model_id, job_id):
     model = await _get_model(model_id)
     job = await _get_job(job_id, kind='img2img')
@@ -295,3 +298,26 @@ async def get_model_img2img(model_id, job_id):
         "keys": ["id", "job_id", "image_type", "path", "hd_id", "status", "is_delete", "updated_time", "created_time"],
         "images": [model_to_dict(img) for img in images]
     }
+
+
+async def get_output(size=20, page=1):
+    async with Sess() as sess:
+        stmt_job = select(UserJobImage).order_by(
+            UserJobImage.created_time.desc(), UserJobImage.id).offset(size * page).limit(size)
+        jobs = {row[0].id: model_to_dict(row[0]) for row in (await sess.execute(stmt_job)).all()}
+        stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs)).order_by(case({job_id: index for index, job_id in enumerate(jobs)}, value=OutputImageFile.job_id))
+        images = [model_to_dict(row[0]) for row in (await sess.execute(stmt_images)).all()]
+        ret = {}
+        for img in images:
+            if img['job_id'] not in ret:
+                ret[img['job_id']] = jobs[img['job_id']]
+            if 'images' not in ret[img['job_id']]:
+                ret[img['job_id']]['images'] = []
+            img['url'] = to_url(img['path'])
+            ret[img['job_id']]['images'].append(img)
+        result = list(ret.values())
+
+        return {
+            "job_keys": ["id", "user_model_id",	"image_type", "show_name", "updated_time", "created_time", "is_delete",	"status"],
+            "rows": result
+        }

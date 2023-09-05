@@ -10,7 +10,11 @@
     <tbody>
         <tr>
             {% for k in model %}
-            <td>{{ model[k] }}</td>
+                {% if k == 'id' %}
+                <td><a href="/model/{{model[k]}}/jobs">{{ model[k] }}</td>
+                {% else %}
+                <td>{{ model[k] }}</td>
+                {% endif %}
             {% endfor %}
         </tr>
     </tbody>
