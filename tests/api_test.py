@@ -1,18 +1,19 @@
-import random
+from random import choice, sample
 import os
 import time
 import pytest
 from api.app import App, upload
+from api import db
 
-scarlett_dir = '/Users/chensg/Pictures/scarlettJohansson'
-daddario_dir = '/Users/chensg/Pictures/Alexandra Daddario'
-captain_dir = '/Users/chensg/Pictures/americanCaptain'
-guoda_dir = '/Users/chensg/Pictures/guoda'
-jason_dir = '/Users/chensg/Pictures/JasonStatham'
+scarlett = '/Users/chensg/Pictures/scarlettJohansson'
+daddario = '/Users/chensg/Pictures/Alexandra Daddario'
+captain = '/Users/chensg/Pictures/americanCaptain'
+guoda = '/Users/chensg/Pictures/guoda'
+jason = '/Users/chensg/Pictures/JasonStatham'
+lf = '/Users/chensg/Pictures/lf_样本预处理/lf_train_pics'
 
-images_scarlett = [os.path.join(scarlett_dir, f) for f in os.listdir(scarlett_dir)]
-images_daddario = [os.path.join(daddario_dir, f) for f in os.listdir(daddario_dir)]
-images_jason = [os.path.join(jason_dir, f) for f in os.listdir(jason_dir)]
+def pics(directory):
+    return [os.path.join(directory, f) for f in os.listdir(directory)]
 
 face_ext_heif = '/Users/chensg/Pictures/scarlettJohansson/379.heif'
 face_ext_avif = '/Users/chensg/Pictures/hero.avif' # not supported file format
@@ -20,66 +21,87 @@ face_not_human = '/Users/chensg/Downloads/891.jpg'
 face_too_many = '/Users/chensg/Pictures/scarlettJohansson/marvel-scarlett-johansson-zoe-saldana-dave-bautista-done-with-mcu.jpg'
 face_scarlett2 = '/Users/chensg/Pictures/scarlettJohansson/R (4).jpeg'
 face_scarlett = '/Users/chensg/Pictures/scarlettJohansson/R.jpeg'
-face_daddario_random = images_daddario[random.randint(0, len(images_daddario) - 1)]
-face_jason_random = images_jason[random.randint(0, len(images_jason) - 1)]
 
 error_files = [face_ext_avif, face_not_human, face_too_many]
 
 
-@pytest.mark.parametrize('user, model_id, face, dataset, update, train', [
-    # ('c', None, face_scarlett2, images_scarlett, {'modelName': 'scar'}, True),
-    ('c', 421, face_scarlett, images_daddario, {'modelName': 'daddario'}, False),
-    # ('c', 406, face_jason_random, images_jason, {'modelName': 'guo'}, True),
-    # ('b', 342, None, None, None, True),
-    # ('c', None, face_scarlett, images_scarlett, None, True),
-    # ('c', None, face_daddario_random, images_daddario, None, True),
-    # ('c', None, face_daddario_random, images_daddario, {'gender': 'male'}, True),
-    # ('c', None, face_daddario_random, images_daddario, None, False),
-    # ('b', None, face_scarlett2, None, None, False),
+@pytest.mark.parametrize('uid, model_id, face, dataset, update, train', [
+    # ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
+    # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
+
+    ('c', 491, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
+
+    ('c', 494, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
+
 ])
-def test_train(user:str|None, model_id:int|None, face:str|None, dataset:list[str]|None, update:dict|None, train:bool):
+def test_train(uid:str|int|None, model_id:int|None, face:str|int|None, dataset:list[str]|list[int]|None, update:dict|None, train:bool):
+    '''face, dataset: local file if type is str; image id if type is int. support str & int mixed in dataset
+    '''
 
-    app = App(user)
-
+    app = App(uid)
+    
+    # include previous images or not
+    include_previous_images = False
+    if model_id:
+        include_previous_images = True
+    
     if not model_id:
         model_id = app.create_model().json()['data']['id']
+    
+    model_name = f'{model_id}-{update.pop("modelName")}' if (update and 'modelName' in update) else f'{model_id}-'
+    app.update_model(id=model_id, modelName=model_name, **update if update else {})
 
     # 正脸
     if face:
-        json = {"modelId": model_id, "fileName": face}
-        data = app.create_face(json).json()['data']
-        image_id = data['id']
-        upload(face, data['host'], data['uploadParam'])
+        if isinstance(face, str):
+            json = {"modelId": model_id, "fileName": face}
+            data = app.create_face(json).json()['data']
+            upload(face, data['host'], data['uploadParam'])
+            image_id = data['id']
+        else: 
+            # isinstance(face, int)
+            image_id = face
+        
 
         job_id = app.finish_face({"imageId": image_id, "modelId": model_id}).json()[
             'data']['jobId']
         
         while data:=app.job_state(job_id).json()['data']:
             if data['status'] != 'success':
-                time.sleep(1)
+                time.sleep(2)
                 continue
             # if data['faceDetectionResult']['status'] != 'checked':
             #     return
             if data['faceDetectionResult']['status'] == 'checked':
                 break
+            else:
+                return
 
     # 补充
     # if dataset:
     # face合格后上传
-    if dataset and data['faceDetectionResult']['status'] == 'checked':
-        fs = app.create_dataset(model_id, dataset).json()['data']
-        ids = []
-        for f in fs:
-            upload(f['fileName'], f['host'], f['uploadParam'])
-            ids.append(f['id'])
+    if dataset:
+        ids = [image.id for image in db.get_dataset_images(model_id) if image.status == 'invalid'] if include_previous_images else []
+        if len(ids) < 200:
+            images = []
+            for file in dataset:
+                if isinstance(file, int):
+                    ids.append(file)
+                else:
+                    # isinstance(file, str)
+                    images.append(file)
+            if images:
+                fs = app.create_dataset(model_id, images).json()['data']
+                for f in fs:
+                    upload(f['fileName'], f['host'], f['uploadParam'])
+                    ids.append(f['id'])
+        if len(ids) > 200:
+            ids = sample(ids, k=200)
         job_id = app.finish_dataset(model_id, ids).json()['data']['jobId']
         print(f'dataset job: {job_id}')        
         while app.job_state(job_id).json()['data']['status'] != 'success':
             time.sleep(1)
     
-    model_name = f'{model_id}-{update.pop("modelName")}' if (update and 'modelName' in update) else f'{model_id}-'
-    app.update_model(id=model_id, modelName=model_name, **update if update else {})
-
     if train:
         app.train(model_id)
 
@@ -89,8 +111,8 @@ def test_train(user:str|None, model_id:int|None, face:str|None, dataset:list[str
 ])
 def test_output(user, model_id):
     app = App(user)
-    theme_id = random.choice(app.theme_list().json()['data'])['id']
-    theme_model_id = random.choice(app.theme_detail(theme_id).json()['data']['modelList'])['id']
+    theme_id = choice(app.theme_list().json()['data'])['id']
+    theme_model_id = choice(app.theme_detail(theme_id).json()['data']['modelList'])['id']
     app.output_portray(modelId=model_id, themeId=theme_id, themeModelId=theme_model_id)
 
 
@@ -121,7 +143,7 @@ def test_job_state(job_id):
 ])
 def test_finish_face_with_old_image_id(user, model_id, image_id):
     
-    app =App(user)
+    app = App(user)
     json = {
         "modelId": model_id,
         "imageId": image_id
@@ -141,7 +163,7 @@ def test_finish_face_with_old_image_id(user, model_id, image_id):
     # ('c', 333, face_file),
     # ('b', 333, face_file),
     # ('b', 330, face_file2),
-    ('b', 331, face_daddario_random)
+    ('b', 331, choice(pics(daddario)))
 ])
 def test_finish_face_with_new_image(user, model_id, face_file):
     # create face
@@ -195,7 +217,7 @@ def test_finish_dataset_with_old_image(user, model_id, ids):
     # ('b', 333, files[:1]),
     # ('b', 330, [image_avif, image_heif, image_no_face, image_too_many_faces]),
     # ('b', 330, files + error_files),
-    ('b', 342, images_scarlett[0:1]),
+    ('b', 342, pics(scarlett)[0:1]),
 
 ])
 def test_finish_dataset_with_new_image(user, model_id, dataset):

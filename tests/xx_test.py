@@ -1,5 +1,11 @@
+import logging
+from requests import request
+import pytest
 import face_recognition
-li = [ { "id": 6164, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/95abdf19-244f-4fdd-a967-bad2a0d37ba1.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6165, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/7760a618-7ba7-4f51-8988-120f5f47a319.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6166, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/4b0bd0b1-8896-4b21-8050-86285b999bd2.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "识别到多张人脸", "status": "invalid" }, { "id": 6167, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/98723ac1-284c-4903-8d58-423463bb4ec3.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "不是同一个人", "status": "invalid" }, { "id": 6168, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/86e2edc3-c753-4e1c-9ebd-3491396d42f0.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6169, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/b1a6d373-95ea-4e86-bb33-53c320757077.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "不是同一个人", "status": "invalid" }, { "id": 6170, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/79a99b73-ba4d-4c6e-8fcd-18f862f11240.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "不是同一个人", "status": "invalid" }, { "id": 6171, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/be928143-71f0-48fa-8167-b9b0ea8e2a58.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6172, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/c562a5b7-3d4b-4081-9fa4-2ed2e1e0c32b.heif~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6173, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/b692cb99-1697-476e-9461-29e4f6d26513.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6174, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/a2efc0de-4937-47f9-a11d-fc3355539294.heif~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6175, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/42b04a74-bae9-4731-b26d-7cd21cf80430.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "不是同一个人", "status": "invalid" }, { "id": 6176, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/807c7f96-492b-456b-b075-fa97d6eb689f.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6177, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/d3590723-9c40-4744-a0ab-d715f54ebb5b.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6178, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/15cc166e-511e-4a49-a00f-d89ab598677a.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6179, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/ed59f0ce-ce76-49ff-84e0-3510298103d6.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "不是同一个人", "status": "invalid" }, { "id": 6180, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/b24642fe-1644-4991-a594-4211b0787e0a.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6181, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/d11e4618-d234-4348-83e7-9c8cb7279800.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "不是同一个人", "status": "invalid" }, { "id": 6182, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/15fca111-43f4-4bbb-99a6-e6badc3b05b5.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6183, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/8a2b0ff7-f2c3-4d22-811a-0c16db4c08b8.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6184, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/720499f6-9607-4c87-9425-aca37489697e.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6185, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/7ecf63df-bd90-4d37-979a-7dbb36ae1421.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6186, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/c0d9d831-91fb-46df-ad9a-8d5f959566ce.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "不是同一个人", "status": "invalid" }, { "id": 6187, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/f256e749-f75c-4881-9b6b-a208267c1089.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "不是同一个人", "status": "invalid" }, { "id": 6188, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/2d7569f9-579f-4c05-9174-5d52cb7bd373.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" }, { "id": 6189, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/0c3f1ff8-47ba-4460-b05e-d417611ae12a.jpeg~tplv-5x3rixm6so-watermark-v1.image", "reason": "没有识别到人脸", "status": "invalid" }, { "id": 6190, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/21f470e0-e3cc-4552-9d27-76bf000f8492.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "不是同一个人", "status": "invalid" }, { "id": 6191, "imageType": "dataset_verify", "imageUrl": "https://fineai-secure0.xpccdn.com/xw-dev/upload/14/349/dataset_verify/9d803dbb-4f13-4a02-b298-d13921c35516.jpg~tplv-5x3rixm6so-watermark-v1.image", "reason": "ok", "status": "checked" } ]
+from api.app import App
+from fineai_test.services.mq import consume
+from api.config import settings
+
 
 def test_compare():
     pics =  [
@@ -20,6 +26,29 @@ def test_compare():
     distance = face_recognition.face_distance(encodings, encodings[0])
     print(f'{distance=}')
 
-def test_yyy():
-    print([i['id'] for i in li])
-    
+@pytest.mark.asyncio
+async def test_yyy():
+    # app = await App('c')
+    app = await App(14)
+    app.output_portray(modelId=401, themeId=1, themeModelId=1)
+
+
+def test_zzz():
+    app = App('c')
+    # app = App(14)
+    app.output_portray(modelId=401, themeId=1, themeModelId=1)
+
+cert = settings.REQUESTS_CA_BUNDLE
+proxies = {'http': settings.http_proxy, 'https': settings.https_proxy}
+
+def test_mq():
+    tasks = [
+        '38563706-8d23-4748-9505-1cd2b29ee14c',
+        '24176e75-f572-4424-9424-fedfeb6126a1',
+        '671a6f05-c85f-4526-ab2c-6381b2e7ca4f'
+    ]
+    json = {
+        'tasks': tasks,
+    }
+    request('post', 'http://192.168.103.101:8000/consume', json=tasks, proxies=proxies, verify=cert)
+    # consume(**json)

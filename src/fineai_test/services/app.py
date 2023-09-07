@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy import select, case
 from fineai_test.db import Sess
-from fineai_test.db.app import UploadImageFile, Job, UserModel, OutputImageFile, UserJobImage
+from fineai_test.db.app import UploadImageFile, Job, UserModel, OutputImageFile, UserJobImage, UserBaseInfo
 from fineai_test.utils.utils import to_url, key_to_url, file_name, model_to_dict
 from fineai_test.utils import s3
 
@@ -12,6 +12,19 @@ log = logging.getLogger(__name__)
 #     stmt = select(UserModel).order_by(UserModel.id.desc())
 #     return s, stmt
 
+async def get_user_info(user_id:int):
+    async with Sess() as sess:
+        stmt = select(UserBaseInfo).where(UserBaseInfo.id==user_id)
+        rs = await sess.execute(stmt)
+        row = rs.one_or_none()
+    if row:
+        return row[0]
+
+async def get_dataset_images(model_id:int) -> list[UploadImageFile]:
+    async with Sess() as sess:
+        stmt = select(UploadImageFile).where(UploadImageFile.user_model_id==model_id)
+        rows = (await sess.execute(stmt)).all()
+    return [row[0] for row in rows]
 
 async def get_models(size=200, page=1):
     async with Sess() as sess:

@@ -7,4 +7,4 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(name)s %(module)s:%(lineno)d - %(message)s',
     force=True,
 )
-logging.getLogger().setLevel(settings.log_level)
+logging.getLogger(__name__).setLevel(settings.log_level)

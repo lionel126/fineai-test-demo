@@ -7,6 +7,7 @@
 #   all-features: false
 
 -e file:.
+aiofiles==23.2.1
 aiohttp==3.8.5
 aiosignal==1.3.1
 annotated-types==0.5.0
@@ -31,6 +32,7 @@ face-recognition==1.3.0
 face-recognition-models==0.3.0
 fastapi==0.101.1
 fastapi-pagination==0.12.9
+fineai-task-schema @ git+https://robot:b37b72ff3562754b870e265aafe2d795464e3202@gitea.vmovier.cc/fineai/fineai-task-schema.git@v0.1.13
 frozenlist==1.4.0
 greenlet==2.0.2
 h11==0.14.0
@@ -50,9 +52,12 @@ packaging==23.1
 parso==0.8.3
 pexpect==4.8.0
 pickleshare==0.7.5
+pika==1.3.2
 pillow==10.0.0
 pluggy==1.2.0
 prompt-toolkit==3.0.39
+psycopg==3.1.10
+psycopg-binary==3.1.10
 psycopg2-binary==2.9.7
 ptyprocess==0.7.0
 pure-eval==0.2.2
@@ -62,9 +67,11 @@ pydantic-settings==2.0.3
 pygments==2.16.1
 pyjwt==2.8.0
 pytest==7.4.0
+pytest-asyncio==0.21.1
 python-dateutil==2.8.2
 python-dotenv==1.0.0
 requests==2.31.0
+retrying==1.3.4
 ruff==0.0.285
 s3transfer==0.6.2
 six==1.16.0

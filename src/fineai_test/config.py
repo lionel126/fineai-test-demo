@@ -12,13 +12,7 @@ class BucketSetting(BaseSettings):
     addressing_style: str = "path"
     signature_version: str = "s3v4"
 
-class UserSetting(BaseSettings):
-    user_id: int
-    user_info_id: int
-    union_id: str
-    open_id: str
-    app_id: str
-    
+
 class Settings(BaseSettings):
     model_config = ConfigDict(
         env_file=".env",
@@ -27,19 +21,20 @@ class Settings(BaseSettings):
         str_strip_whitespace=True,
     )  # type: ignore
 
-    postgresql_uri:str = 'postgresql+asyncpg://appuser:4b9d46ebc@10.173.4.249:5432/app_store'
-    sql_echo:bool = True
+    postgresql_uri: str = 'postgresql+asyncpg://appuser:4b9d46ebc@10.173.4.249:5432/app_store'
+    sql_echo: bool = True
 
     bucket: dict[str, dict[str, BucketSetting]] = {}
 
     def get_bucket(self, vendor: str, region: str) -> BucketSetting | None:
         return self.bucket.get(vendor, {}).get(region)
 
-    usr: dict[str, UserSetting] = {}
-
-    def get_usr(self, uid:str):
-        return self.usr.get(uid)
-    
     log_level: int = logging.DEBUG
+
+    rabbitmq_uri: str = "amqp://guest:guest@localhost:5672"
+    rabbitmq_task_exchange: str = "fineai_task"
+    rabbitmq_task_topics: list[str] = ["lora_train"]
+    rabbitmq_task_queue: str = "fineai_task_train"
+
 
 settings = Settings()

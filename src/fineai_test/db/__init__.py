@@ -15,4 +15,3 @@ class RoutingSession(Session):
 
 Sess = sessionmaker(class_=AsyncSession, sync_session_class=RoutingSession)
 # Sess = sessionmaker(bind=engines['test'], class_=AsyncSession)
-

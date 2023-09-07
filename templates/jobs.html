@@ -1,13 +1,38 @@
 {% extends "components/layout.html" %}
 {% block content %}
 <head>        
-    <title>jobs</title>        
+    <title>jobs</title>
+    <script>
+        function consume(){
+            let data = []
+            let inputs = document.querySelectorAll("input[type='checkbox']:checked").forEach(
+                el => data.push(el.closest('td').nextElementSibling.innerText)
+            )
+            fetch("/consume", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify(data)
+            }).then(res => res.text())
+            .then(data => console.log(data))
+            .catch(err => console.log(`error: ${err}`));
+            }
+        function checkAll(){
+            document.querySelectorAll("input[type='checkbox']:not([disabled]):not(:checked)").forEach(
+                el => el.click()
+            )
+        }
+    </script>
 </head>
 <h3>jobs</h3>
+<div style="padding: 10px;">
+    <button onclick="checkAll()">select all</button>
+    <button onclick="consume()">delete mq message</button>
+</div>
 <body>
     <table>
         <thead class="sticky">                
             <tr>
+                <th></th>
                 {% for k in keys %}
                 <th>{{ k }}</th>
                 {% endfor %}
@@ -16,6 +41,7 @@
         <tbody>
             {% for job in jobs %}
             <tr class="{{ 'deleted' if job['is_delete'] == True}}">
+                <td><input {{ 'disabled' if job['job_kind'] != 'lora_train'}} type="checkbox"></td>
                 {% for k in keys %}
                     {% if k == 'id' %}
                     <td><a href="/model/{{ job['user_model_id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>

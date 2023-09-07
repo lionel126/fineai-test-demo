@@ -1,25 +1,58 @@
 from urllib.parse import urlparse
 
-from fineai_test.utils.utils import jwt_token
+from .utils import jwt_token
 from .session import Session
 from .config import settings
+# from fineai_test.services.app import get_user_info
+from .db import get_user_info
+
+
+# class AsyncObj():
+#     async def __new__(cls, *a, **kw):
+#         inst = super().__new__(cls)
+#         await inst.__init__(*a, **kw)
+#         return inst
+#     # async def __init__(self):
+#     #     pass
+
+# class App(AsyncObj):
+#     # async class implementation. Instantiate with: await App()
+#     async def __init__(self, uid:str|int|None=None, base_url=settings.app_base_url):
+#         # s = requests.Session()
+#         s = Session(base_url)
+#         # s.proxies = proxies
+#         # s.verify = cert
+#         self.s = s
+#         if uid:
+#             await self._login(uid)
+
+#     async def _login(self, uid:str|int):
+#         url = urlparse(self.s.base_url)
+#         # iss = f'{url.scheme}://{url.hostname}'
+#         iss = f'http://{url.hostname}' + (f':{url.port}' if url.port else '')
+#         if isinstance(uid, str):
+#             user = settings.get_user_info(uid)
+#         else:
+#             user = await get_user_info(uid)
+#         self.s.cookies.update({'USER-COOKIE-TOKEN-DEV': jwt_token(user, iss)})
 
 class App():
-    
-    def __init__(self, uid:str|None=None, base_url=settings.app_base_url):
-        # s = requests.Session()
-        s = Session(base_url)
-        # s.proxies = proxies
-        # s.verify = cert
+
+    def __init__(self, uid:str|int|None=None, base_url=settings.app_base_url):
+        s = Session(base_url)        
         self.s = s
         if uid:
             self._login(uid)
 
-    def _login(self, uid):
+    def _login(self, uid:str|int):
         url = urlparse(self.s.base_url)
         # iss = f'{url.scheme}://{url.hostname}'
         iss = f'http://{url.hostname}' + (f':{url.port}' if url.port else '')
-        self.s.cookies.update({'USER-COOKIE-TOKEN-DEV': jwt_token(uid, iss)})
+        if isinstance(uid, str):
+            user = settings.get_user_info(uid)
+        else:
+            user = get_user_info(uid)
+        self.s.cookies.update({'USER-COOKIE-TOKEN-DEV': jwt_token(user, iss)})
     
     def create_model(self):
         return self.s.post('/app/user/model/create')

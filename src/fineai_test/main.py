@@ -2,12 +2,14 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 # from fastapi_pagination import Page, add_pagination, paginate
-# from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field
+from typing import List
 
 from fineai_test.services.app import get_images_by_job, compare_job_results, \
     get_model_jobs, get_model_lora, get_model_dataset_verify, \
     get_lora_result, get_models, get_model_face_detection, \
     get_model_img2img, get_outputs, get_jobs
+from fineai_test.services import mq
 
 app = FastAPI()
 
@@ -21,7 +23,7 @@ templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/")
-async def root(request:Request):
+async def root(request: Request):
     data = {"request": request}
     return templates.TemplateResponse("index.html", data)
 
@@ -106,6 +108,7 @@ async def outputs(request: Request):
     data = {"request": request, **ret}
     return templates.TemplateResponse("outputs.html", data)
 
+
 @app.get(path='/jobs')
 async def jobs(request: Request):
     size = int(request.query_params.get('size', 50))
@@ -113,3 +116,9 @@ async def jobs(request: Request):
     ret = await get_jobs(size=size, page=page)
     data = {"request": request, **ret}
     return templates.TemplateResponse("jobs.html", data)
+
+
+@app.post(path='/consume')
+async def consume(tasks: List[str]):
+    ret = mq.consume(tasks)
+    return ret
