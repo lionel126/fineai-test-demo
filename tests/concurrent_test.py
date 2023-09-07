@@ -9,7 +9,9 @@ from api_test import pics
 from fineai_test.services.app import get_dataset_images
 
 @pytest.mark.parametrize('uid, model_id, face, dataset, update, train', [
-    ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
+    # ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
+    # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
+
     ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
 ])
 @pytest.mark.asyncio

@@ -16,7 +16,7 @@ def connect(tasks:list[str], ret:list[str]):
     channel = connection.channel()
 
     queue = channel.queue_declare(queue=settings.rabbitmq_task_queue, durable=True, arguments={
-        'x-message-ttl': 60*60*24*1000,
+        'x-message-ttl': 60*60*24*1000*7,
         'x-max-priority': 10,
     })
     # 检查队列中是否还有消息

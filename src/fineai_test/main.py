@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 # from fastapi_pagination import Page, add_pagination, paginate
@@ -20,6 +20,43 @@ templates = Jinja2Templates(directory="templates")
 # class UserModel(BaseModel):
 #     id: int = Field(example=100)
 #     user_id: int = Field(examples=1)
+
+
+class JobReq(BaseModel):
+    id: str | None = None
+    user_model_id: int | None = None
+    job_kind: str | None = None
+    is_delete: bool | None = None
+    status: str | None = None
+
+    size: int | None = 50
+    page: int | None = 1
+
+
+class ModelReq(BaseModel):
+    id: int | None = None
+    user_id: int | None = None
+    model_name: str | None = None
+    gender: int | None = None
+    status: str | None = None
+    pay_status: str | None = None
+    order_no: str | None = None
+    image_id: int | None = None
+
+    size: int | None = 50
+    page: int | None = 1
+
+
+class OutputReq(BaseModel):
+    id: str | None = None
+    user_model_id: int | None = None
+    image_type: str | None = None
+    show_name: str | None = None
+    status: str | None = None
+    is_delete: bool | None = None
+
+    size: int | None = 50
+    page: int | None = 1
 
 
 @app.get("/")
@@ -101,19 +138,17 @@ async def img2img(request: Request, model_id: int, job_id: str):
 
 
 @app.get(path='/outputs')
-async def outputs(request: Request):
-    size = int(request.query_params.get('size', 50))
-    page = int(request.query_params.get('page', 1))
-    ret = await get_outputs(size=size, page=page)
+async def outputs(request: Request, req: OutputReq = Depends()):
+
+    ret = await get_outputs(**req.model_dump())
     data = {"request": request, **ret}
     return templates.TemplateResponse("outputs.html", data)
 
 
 @app.get(path='/jobs')
-async def jobs(request: Request):
-    size = int(request.query_params.get('size', 50))
-    page = int(request.query_params.get('page', 1))
-    ret = await get_jobs(size=size, page=page)
+async def jobs(request: Request, req: JobReq = Depends()):
+
+    ret = await get_jobs(**req.model_dump())
     data = {"request": request, **ret}
     return templates.TemplateResponse("jobs.html", data)
 

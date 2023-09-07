@@ -12,24 +12,33 @@ log = logging.getLogger(__name__)
 #     stmt = select(UserModel).order_by(UserModel.id.desc())
 #     return s, stmt
 
-async def get_user_info(user_id:int):
+
+async def get_user_info(user_id: int):
     async with Sess() as sess:
-        stmt = select(UserBaseInfo).where(UserBaseInfo.id==user_id)
+        stmt = select(UserBaseInfo).where(UserBaseInfo.id == user_id)
         rs = await sess.execute(stmt)
         row = rs.one_or_none()
     if row:
         return row[0]
 
-async def get_dataset_images(model_id:int) -> list[UploadImageFile]:
+
+async def get_dataset_images(model_id: int) -> list[UploadImageFile]:
     async with Sess() as sess:
-        stmt = select(UploadImageFile).where(UploadImageFile.user_model_id==model_id)
+        stmt = select(UploadImageFile).where(
+            UploadImageFile.user_model_id == model_id)
         rows = (await sess.execute(stmt)).all()
     return [row[0] for row in rows]
 
-async def get_models(size=200, page=1):
+
+async def get_models(size=200, page=1, **kw):
     async with Sess() as sess:
-        stmt = select(UserModel).order_by(UserModel.id.desc()
-                                          ).limit(size).offset((page - 1) * size)
+        stmt = select(UserModel)
+        if kw:
+            for k, v in kw.items():
+                if v:
+                    stmt = stmt.where(getattr(Job, k) == v)
+        stmt = stmt.order_by(UserModel.id.desc()
+                             ).limit(size).offset((page - 1) * size)
         rs = (await sess.execute(stmt)).all()
     models = [model_to_dict(r[0]) for r in rs]
 
@@ -313,12 +322,18 @@ async def get_model_img2img(model_id, job_id):
     }
 
 
-async def get_outputs(size=20, page=1):
+async def get_outputs(size=20, page=1, **kw):
     async with Sess() as sess:
-        stmt_job = select(UserJobImage).order_by(
-            UserJobImage.created_time.desc(), UserJobImage.id).offset(size * (page - 1)).limit(size)
+        stmt_job = select(UserJobImage)
+        if kw:
+            for k, v in kw.items():
+                if v:
+                    stmt_job = stmt_job.where(getattr(Job, k) == v)
+        stmt_job = stmt_job.order_by(UserJobImage.created_time.desc(
+        ), UserJobImage.id).offset(size * (page - 1)).limit(size)
         jobs = {row[0].id: model_to_dict(row[0]) for row in (await sess.execute(stmt_job)).all()}
-        stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs)).order_by(case({job_id: index for index, job_id in enumerate(jobs)}, value=OutputImageFile.job_id))
+        stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs)).order_by(
+            case({job_id: index for index, job_id in enumerate(jobs)}, value=OutputImageFile.job_id))
         images = [model_to_dict(row[0]) for row in (await sess.execute(stmt_images)).all()]
         ret = {}
         for job_id, job in jobs.items():
@@ -336,9 +351,15 @@ async def get_outputs(size=20, page=1):
         }
 
 
-async def get_jobs(size=200, page=1):
+async def get_jobs(size=200, page=1, **kw):
     async with Sess() as sess:
-        stmt = select(Job).order_by(Job.created_time.desc()).limit(size).offset((page - 1) * size)
+        stmt = select(Job)
+        if kw:
+            for k, v in kw.items():
+                if v:
+                    stmt = stmt.where(getattr(Job, k) == v)
+        stmt = stmt.order_by(Job.created_time.desc()).limit(
+            size).offset((page - 1) * size)
         rs = (await sess.execute(stmt)).all()
 
     jobs = [model_to_dict(r[0]) for r in rs]
