@@ -66,6 +66,7 @@ def connect(tasks:list[str], ret:list[str]):
 
 # @retry(stop_max_attempt_number=2)
 def consume(tasks:list[str]):
+    log.debug(f'consume: {tasks=}')
     ret = []
     
     log.debug('Waiting for messages. To exit press CTRL+C')
@@ -76,5 +77,5 @@ def consume(tasks:list[str]):
         log.debug("no messages in the queue. Exiting...")
     except pika.exceptions.ConnectionClosedByBroker:
         log.debug("No more messages in the queue. Exiting...")
-    log.debug(f'{ret=}')
+    log.debug(f'consume: {ret=}')
     return ret
