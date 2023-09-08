@@ -9,4 +9,6 @@ logs/
 .vscode/
 
 # venv
-.venv
+.venv/
+
+.env
