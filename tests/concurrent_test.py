@@ -90,7 +90,7 @@ async def test_train(uid, model_id, face, dataset, update, train):
     # ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
     # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
 
-    ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
+    ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario', 'gender': choice(['female', 'male'])}, True),
 ])
 @pytest.mark.asyncio
 async def test_keep_training(uid, model_id, face, dataset, update, train):
