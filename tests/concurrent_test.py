@@ -11,11 +11,13 @@ from fineai_test.services.mq import connect
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
+
 @pytest.mark.parametrize('uid, model_id, face, dataset, update, train', [
     # ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
     # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
 
-    ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
+    ('c', None, choice(pics(daddario)), pics(
+        daddario), {'modelName': 'daddario'}, True),
 ])
 @pytest.mark.asyncio
 async def test_train(uid, model_id, face, dataset, update, train):
@@ -23,11 +25,12 @@ async def test_train(uid, model_id, face, dataset, update, train):
         include_previous_images = False
         if model_id:
             include_previous_images = True
-        
+
         if not model_id:
             model_id = (await (await app.create_model()).json())['data']['id']
-        
-        model_name = f'{model_id}-{update.pop("modelName")}' if (update and 'modelName' in update) else f'{model_id}-'
+
+        model_name = f'{model_id}-{update.pop("modelName")}' if (
+            update and 'modelName' in update) else f'{model_id}-'
         await app.update_model(id=model_id, modelName=model_name, **update if update else {})
 
         # 正脸
@@ -38,15 +41,14 @@ async def test_train(uid, model_id, face, dataset, update, train):
                 # await upload(face, data['host'], data['uploadParam'])
                 await uploads([data,])
                 image_id = data['id']
-            else: 
+            else:
                 # isinstance(face, int)
                 image_id = face
-            
 
             job_id = (await (await app.finish_face({"imageId": image_id, "modelId": model_id})).json())[
                 'data']['jobId']
-            
-            while data:=(await (await app.job_state(job_id)).json())['data']:
+
+            while data := (await (await app.job_state(job_id)).json())['data']:
                 if data['status'] != 'success':
                     time.sleep(2)
                     continue
@@ -75,13 +77,13 @@ async def test_train(uid, model_id, face, dataset, update, train):
                     await uploads(fs)
                     for f in fs:
                         # await upload(f['fileName'], f['host'], f['uploadParam'])
-                        ids.append(f['id'])                    
+                        ids.append(f['id'])
             if len(ids) > 200:
                 ids = sample(ids, k=200)
-            job_id = (await (await app.finish_dataset(model_id, ids)).json())['data']['jobId']       
+            job_id = (await (await app.finish_dataset(model_id, ids)).json())['data']['jobId']
             while (await (await app.job_state(job_id)).json())['data']['status'] != 'success':
                 time.sleep(1)
-        
+
         if train:
             await app.train(model_id)
 
@@ -90,15 +92,18 @@ async def test_train(uid, model_id, face, dataset, update, train):
     # ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
     # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
 
-    ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario', 'gender': choice(['female', 'male'])}, True),
+    ('c', None, choice(pics(daddario)), pics(daddario), {
+     'modelName': 'daddario', 'gender': choice(['female', 'male'])}, True),
 ])
 @pytest.mark.asyncio
 async def test_keep_training(uid, model_id, face, dataset, update, train):
 
     connection, _, queue = connect()
-    try:
-        if queue.method.message_count == 0:
-            log.debug('train >>>>> ' * 10)            
-            await test_train(uid, model_id, face, dataset, update, train)
-    finally:
-        connection.close()
+    count = queue.method.message_count
+    connection.close()
+
+    if count > 0:
+        return
+
+    log.debug('train >>>>> ' * 10)
+    await test_train(uid, model_id, face, dataset, update, train)
