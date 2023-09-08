@@ -16,7 +16,7 @@ log.setLevel(logging.DEBUG)
     # ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
     # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
 
-    ('c', None, choice(pics(daddario)), pics(
+    ('a', None, choice(pics(daddario)), pics(
         daddario), {'modelName': 'daddario'}, True),
 ])
 @pytest.mark.asyncio

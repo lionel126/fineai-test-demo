@@ -37,15 +37,23 @@ class App(AsyncObj):
         url = urlparse(self.base_url)
         # iss = f'{url.scheme}://{url.hostname}'
         iss = f'http://{url.hostname}' + (f':{url.port}' if url.port else '')
+        # port: 80 in request header host on prod
+        # iss = f'https://{url.hostname}:80'
         if isinstance(uid, str):
             user = settings.get_user_info(uid)
         else:
             user = await get_user_info(uid)
         self.s.cookie_jar.update_cookies(
-            {'USER-COOKIE-TOKEN-DEV': jwt_token(user, iss)})
+            {settings.token_key: jwt_token(user, iss)})
 
     async def create_model(self):
         return await self.s.post('/app/user/model/create')
+    
+    async def face_list(self, model_id):
+        return await self.s.get(f'/app/user/model/face/image/list?modelId={model_id}')
+
+    async def dataset_list(self, model_id):
+        return await self.s.get(f'/app/user/model/dataset/image/list?modelId={model_id}')
 
     async def create_face(self, json):
         '''json: default = {

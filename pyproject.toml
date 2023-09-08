@@ -30,6 +30,7 @@ dependencies = [
     "pika>=1.3.2",
     "fineai-task-schema @ git+https://robot:b37b72ff3562754b870e265aafe2d795464e3202@gitea.vmovier.cc/fineai/fineai-task-schema.git@v0.1.13",
     "aiofiles>=23.2.1",
+    "locust>=2.16.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
