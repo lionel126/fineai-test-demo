@@ -1,12 +1,15 @@
 import time
+import logging
 from random import sample, choice
 import pytest
-from api.asyncapp import App, upload, uploads
-from api.session import AsyncSession
-from api.config import settings
-from api_test import scarlett, daddario
+from api.asyncapp import App, uploads
+from api_test import daddario
 from api_test import pics
 from fineai_test.services.app import get_dataset_images
+from fineai_test.services.mq import connect
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 @pytest.mark.parametrize('uid, model_id, face, dataset, update, train', [
     # ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
@@ -75,11 +78,27 @@ async def test_train(uid, model_id, face, dataset, update, train):
                         ids.append(f['id'])                    
             if len(ids) > 200:
                 ids = sample(ids, k=200)
-            job_id = (await (await app.finish_dataset(model_id, ids)).json())['data']['jobId']
-            print(f'dataset job: {job_id}')        
+            job_id = (await (await app.finish_dataset(model_id, ids)).json())['data']['jobId']       
             while (await (await app.job_state(job_id)).json())['data']['status'] != 'success':
                 time.sleep(1)
         
         if train:
             await app.train(model_id)
 
+
+@pytest.mark.parametrize('uid, model_id, face, dataset, update, train', [
+    # ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
+    # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
+
+    ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
+])
+@pytest.mark.asyncio
+async def test_keep_training(uid, model_id, face, dataset, update, train):
+
+    connection, _, queue = connect()
+    try:
+        if queue.method.message_count == 0:
+            log.debug('train >>>>> ' * 10)            
+            await test_train(uid, model_id, face, dataset, update, train)
+    finally:
+        connection.close()

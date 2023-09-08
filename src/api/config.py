@@ -30,5 +30,12 @@ class Settings(BaseSettings):
     def get_user_info(self, uid:str):
         return self.user_info.get(uid)
 
+    # pictures directory
+    scarlett: str = '/Users/chensg/Pictures/scarlettJohansson'
+    daddario: str = '/Users/chensg/Pictures/Alexandra Daddario'
+    captain: str = '/Users/chensg/Pictures/americanCaptain'
+    guoda: str = '/Users/chensg/Pictures/guoda'
+    jason: str = '/Users/chensg/Pictures/JasonStatham'
+    lf: str = '/Users/chensg/Pictures/lf_样本预处理/lf_train_pics'
 
 settings = Settings()

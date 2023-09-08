@@ -1,4 +1,5 @@
 import ssl, aiohttp
+import asyncio
 import aiofiles
 from urllib.parse import urlparse
 from .utils import jwt_token
@@ -40,11 +41,7 @@ class App(AsyncObj):
         self.s.cookie_jar.update_cookies({'USER-COOKIE-TOKEN-DEV': jwt_token(user, iss)})
 
     async def create_model(self):
-        print('create model')
-        res = await self.s.post('/app/user/model/create')
-        print(await res.text())
-        print('done')
-        return res
+        return await self.s.post('/app/user/model/create')
     
     async def create_face(self, json):
         '''json: default = {
@@ -103,7 +100,7 @@ class App(AsyncObj):
         return await self.s.post(path)
 
     async def theme_list(self):
-        path = f'/app/theme/list'
+        path = '/app/theme/list'
         return await self.s.get(path)
     
     async def theme_detail(self, theme_id):
@@ -137,18 +134,21 @@ class App(AsyncObj):
             "location": "image",
             "templateId": "UG_tzP8x-STvlGEZCIXVxI_ZBLYendyZXgCLCm6wpkM"
         }'''
-        path = '/app/template/subscribe'
 
 async def uploads(fs):
     ssl_ctx = ssl.create_default_context(cafile=settings.REQUESTS_CA_BUNDLE)
     conn = aiohttp.TCPConnector(ssl=ssl_ctx)
     async with aiohttp.ClientSession(connector=conn) as s:
-        for f in fs:
-            await upload(s, f['fileName'], f['host'], f['uploadParam'])
+        tasks = [upload(s, f['fileName'], f['host'], f['uploadParam']) for f in fs]
+        # for f in fs:
+        #     await upload(s, f['fileName'], f['host'], f['uploadParam'])
+        ret = await asyncio.gather(*tasks, return_exceptions=True)
+    return ret
         
 
 async def upload(s:aiohttp.ClientSession, file:str, url:str, data:dict):
     async with aiofiles.open(file, 'rb') as f:
         file = {data['key']: await f.read()}
         data.update(file)
-        await s.post(url, data=data, proxy=settings.http_proxy)
+        res = await s.post(url, data=data, proxy=settings.http_proxy)
+    return res

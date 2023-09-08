@@ -114,7 +114,7 @@ class App():
         return self.s.post(path)
 
     def theme_list(self):
-        path = f'/app/theme/list'
+        path = '/app/theme/list'
         return self.s.get(path)
     
     def theme_detail(self, theme_id):
@@ -148,7 +148,6 @@ class App():
             "location": "image",
             "templateId": "UG_tzP8x-STvlGEZCIXVxI_ZBLYendyZXgCLCm6wpkM"
         }'''
-        path = '/app/template/subscribe'
 
 def upload(file, url, data):
     s = Session()

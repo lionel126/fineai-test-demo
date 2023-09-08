@@ -1,9 +1,7 @@
-import logging
 from requests import request
 import pytest
 import face_recognition
 from api.app import App
-from fineai_test.services.mq import consume
 from api.config import settings
 
 
@@ -47,8 +45,5 @@ def test_mq():
         '24176e75-f572-4424-9424-fedfeb6126a1',
         '671a6f05-c85f-4526-ab2c-6381b2e7ca4f'
     ]
-    json = {
-        'tasks': tasks,
-    }
     request('post', 'http://192.168.103.101:8000/consume', json=tasks, proxies=proxies, verify=cert)
     # consume(**json)

@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 # from fastapi_pagination import Page, add_pagination, paginate
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict
 from typing import List
 
 from fineai_test.services.app import get_images_by_job, compare_job_results, \
@@ -45,6 +45,10 @@ class ModelReq(BaseModel):
 
     size: int | None = 50
     page: int | None = 1
+
+    model_config = ConfigDict(
+        protected_namespaces=()
+    )
 
 
 class OutputReq(BaseModel):
