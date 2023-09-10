@@ -37,9 +37,10 @@ class Session(requests.Session):
     
 class AsyncSession():
     def __init__(self, base_url=None):
-        
-        ssl_ctx = ssl.create_default_context(cafile=settings.REQUESTS_CA_BUNDLE)
-        conn = aiohttp.TCPConnector(ssl=ssl_ctx)
+        conn = None
+        if settings.REQUESTS_CA_BUNDLE:
+            ssl_ctx = ssl.create_default_context(cafile=settings.REQUESTS_CA_BUNDLE)
+            conn = aiohttp.TCPConnector(ssl=ssl_ctx)
         s = aiohttp.ClientSession(connector=conn)
         if not base_url:
             base_url = ''
