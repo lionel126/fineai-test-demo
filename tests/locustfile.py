@@ -1,53 +1,95 @@
-import time
-from random import sample
-from locust import HttpUser, task, between
+import gevent
+from requests.cookies import cookiejar_from_dict
+from locust import task, between, TaskSet
+from locust.contrib.fasthttp import FastHttpUser
+from locust_plugins.csvreader import CSVReader
 from api.config import settings
 
-cert = settings.REQUESTS_CA_BUNDLE
-proxies = {'http': settings.http_proxy, 'https': settings.https_proxy}
-delay = 3
+csv_data = CSVReader(".data")
 
-checked = [15600, 15604, 15605, 15607, 15578, 15580, 15581, 15583, 15584, 15585, 15588, 15589, 15590, 15591, 15593, 15586, 15621, 15623, 15624, 15594, 15597, 15598, 15609, 15610, 15617, 15608, 15611, 15615, 15625, 15626, 15627, 15628, 15629]
-invalid = [15599, 15601, 15602, 15603, 15606, 15579, 15582, 15587, 15592, 15596, 15620, 15622, 15618, 15613, 15614, 15616, 15619]
-class QuickstartUser(HttpUser):
-    wait_time = between(1, 2)
-    host = settings.app_base_url
-    
+
+# class UserBehavior(TaskSet):
+
+#     def on_start(self):
+#         self.client.cookies.update({settings.token_key: settings.token})
+#         data = next(csv_data)
+#         self.model_id, self.face_id, self.image_ids = int(data[0]), int(data[1]), list(map(int, data[2].split(',')))
+
+#     @task
+#     def train(self):
+        
+        
+#         # job_id = self.client.post(
+#         #     "/app/user/model/image/face/finish",
+#         #     json={
+#         #         "imageId": self.face_id,
+#         #         "modelId": self.model_id
+#         #     }).json()['data']['jobId']
+#         res = self.client.post(
+#             "/app/user/model/image/face/finish",
+#             json={
+#                 "imageId": self.face_id,
+#                 "modelId": self.model_id
+#             })
+#         print(res.json())
+#         job_id = res.json()['data']['jobId']
+#         count = 10
+#         while count > 0:
+#             self.client.get(f'/app/user/model/job/state/{job_id}')
+#             count -= 1
+
+#         self.client.post(f"/app/user/model/image/dataset/finish?modelId={self.model_id}", json=self.image_ids)
+
+#         count = 10
+#         while count > 0:
+#             self.client.get(f'/app/user/model/job/state/{job_id}')
+#             count -= 1
+
+# class MyLocust(HttpUser):
+#     host = settings.app_base_url
+#     tasks = [UserBehavior]
+
+
+
+
+class UserBehavior(TaskSet):
+
     def on_start(self):
-        # self.client.post("/login", json={"username":"foo", "password":"bar"})
-        self.client.cookies.update({settings.token_key: settings.token})
+        cookie_jar = cookiejar_from_dict({settings.token_key: settings.token})
+        self.client.client.cookiejar = cookie_jar
+        data = next(csv_data)
+        self.model_id, self.face_id, self.image_ids = int(data[0]), int(data[1]), list(map(int, data[2:]))
 
     @task
-    def train(self):
-        job_id = self.client.post(
-            "/app/user/model/image/face/finish", 
+    def train(self):        
+        face_job_id = self.client.post(
+            "/app/user/model/image/face/finish",
             json={
-                "imageId": 16705,
-                "modelId": 555
+                "imageId": self.face_id,
+                "modelId": self.model_id
             }).json()['data']['jobId']
-        while self.client.get(f'/app/user/model/job/state/{job_id}').json()['data']['status'] in ('create', 'pending'):
-            # ('success', 'fail')
-            time.sleep(delay)
-            continue
-
-        self.client.post("/app/user/model/image/dataset/finish?modelId=555", json=sample(checked, k=25)+sample(invalid, k=5))
-
-        while self.client.get(f'/app/user/model/job/state/{job_id}').json()['data']['status'] in ('create', 'pending'):
-            # ('success', 'fail')
-            time.sleep(delay)
-            continue
-
-    @task(1)
-    def output(self):
-        json={
-            "modelId": 556,
-            "themeId": 6,
-            "themeModelId": 1
-        }
         
-        job_id = self.client.post("/app/image/output/portray", json=json).json()['data']['jobId']
-        while self.client.get(f"/app/image/output/detail/{job_id}").json()['data']['status'] in ('create', 'pending'):
-            # ('success', 'fail')
-            time.sleep(delay)
-            continue
-            
+        count = 10
+        while count > 0:
+            gevent.sleep(1)
+            self.client.get(f'/app/user/model/job/state/{face_job_id}')
+            count -= 1
+
+        # dataset_job_id = self.client.post(f"/app/user/model/image/dataset/finish?modelId={self.model_id}", json=self.image_ids).json()['data']['jobId']
+        jsn = self.client.post(f"/app/user/model/image/dataset/finish?modelId={self.model_id}", json=self.image_ids).json()
+        print(jsn)
+        dataset_job_id = jsn['data']['jobId']
+
+        count = 10
+        while count > 0:
+            gevent.sleep(1)
+            self.client.get(f'/app/user/model/job/state/{dataset_job_id}')
+            count -= 1
+
+        res = self.client.post(f"/app/user/model/train/{self.model_id}")
+        print(res, res.text)
+
+class MyLocust(FastHttpUser):
+    wait_time = between(1, 2)
+    host = settings.app_base_url
+    tasks = [UserBehavior]
