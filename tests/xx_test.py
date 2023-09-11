@@ -1,12 +1,12 @@
-from sqlalchemy import select, and_
+from sqlalchemy import select
 from requests import request
 import pytest
-from api.app import App
 from api.config import settings
 from fineai_test.db import Sess
 from fineai_test.db.app import UserModel, UploadImageFile
 # from locust.contrib.csvreader import CSVReader
 from locust_plugins.csvreader import CSVReader
+
 
 @pytest.mark.asyncio
 async def test_yyy():
