@@ -62,7 +62,7 @@ async def test_train(uid, model_id, face, dataset, update, train):
 
             job_id = (await (await app.finish_face({"imageId": image_id, "modelId": model_id})).json())[
                 'data']['jobId']
-            times = 10
+            times = 30
             while data := (await (await app.job_state(job_id)).json())['data']:
                 
                 if data['status'] != 'success':
@@ -99,23 +99,23 @@ async def test_train(uid, model_id, face, dataset, update, train):
                         images.append(file)
                 if images:
                     fs = (await (await app.create_dataset(model_id, images)).json())['data']
-                    log.debug(f'{model_id=} dataset before upload')
+                    log.debug(f'{model_id=} dataset before uploading')
                     ts.append(time.time())
                     await uploads(fs)
                     ts.append(time.time())
-                    log.debug(f'{model_id=} dataset after upload')
+                    log.debug(f'{model_id=} dataset after uploaded')
                     for f in fs:
                         # await upload(f['fileName'], f['host'], f['uploadParam'])
                         ids.append(f['id'])
             if len(ids) > 200:
                 ids = sample(ids, k=200)
             job_id = (await (await app.finish_dataset(model_id, ids)).json())['data']['jobId']
-            times = 10
+            times = 60
             while (await (await app.job_state(job_id)).json())['data']['status'] != 'success':
                 times -= 1
                 if times < 0:
                     log.debug(f'{model_id=} finish dataset not finished')
-                    return
+                    break
                 await asyncio.sleep(1)
         ts.append(time.time())        
         if train:
