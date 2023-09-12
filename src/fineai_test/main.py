@@ -70,14 +70,10 @@ async def root(request: Request):
 
 
 @app.get("/models")
-async def models(request: Request):
-    # s, stmt = await get_models_pagination()
-    # return paginate(s, stmt)
-    size = int(request.query_params.get('size', 200))
-    page = int(request.query_params.get('page', 1))
+async def models(request: Request, req: ModelReq = Depends()):
     data = {
         'request': request,
-        **await get_models(size, page)
+        **await get_models(**req.model_dump())
     }
     return templates.TemplateResponse("models.html", data)
 

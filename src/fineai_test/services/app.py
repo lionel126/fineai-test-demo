@@ -328,7 +328,7 @@ async def get_outputs(size=20, page=1, **kw):
         if kw:
             for k, v in kw.items():
                 if v:
-                    stmt_job = stmt_job.where(getattr(Job, k) == v)
+                    stmt_job = stmt_job.where(getattr(UserJobImage, k) == v)
         stmt_job = stmt_job.order_by(UserJobImage.created_time.desc(
         ), UserJobImage.id).offset(size * (page - 1)).limit(size)
         jobs = {row[0].id: model_to_dict(row[0]) for row in (await sess.execute(stmt_job)).all()}
