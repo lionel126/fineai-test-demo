@@ -44,4 +44,6 @@ class Settings(BaseSettings):
     token_key: str = 'USER-COOKIE-TOKEN-DEV'
     token: str = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlvbklkIjoiZE1ZWm9FWDZkbE9yNVI3ayIsInN1YiI6IlhXIElUIENvLiIsImlzcyI6Imh0dHA6Ly9kZXYtd3VrbS52bW92aWVyLmNjIiwibG9naW5fdXNlcl9rZXkiOiJkNmFmYWM2OGY4OWViZDdkZmZjYTQ2YmY0N2M3MjdkMyJ9.IHbT8CuSraRKTXY9zrvtPbyOgrQ6zv_32vWNBxAv0UE'
 
+    max_memory: int = 4
+
 settings = Settings()

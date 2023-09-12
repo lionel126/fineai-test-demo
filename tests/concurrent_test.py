@@ -9,6 +9,7 @@ import asyncio
 from api.asyncapp import App, uploads
 from api_test import daddario
 from api_test import pics
+from api.config import settings
 from fineai_test.services.app import get_dataset_images
 from fineai_test.services.mq import connect
 
@@ -150,8 +151,8 @@ async def test_keep_training(uid, model_id, face, dataset, update, train):
 
 @pytest.mark.asyncio
 async def test_train_concurrently():
-    soft_limit = 8 * 1024 * 1024 * 1024
-    hard_limit = 8 * 1024 * 1024 * 1024
+    soft_limit = settings.max_memory * 1024 * 1024 * 1024
+    hard_limit = settings.max_memory * 1024 * 1024 * 1024
     resource.setrlimit(resource.RLIMIT_AS, (soft_limit, hard_limit))
 
     async def run():
