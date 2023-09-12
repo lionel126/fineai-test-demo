@@ -34,24 +34,14 @@ async def test_1():
                     f.write('\n')
         print(err)
 
-
-def test_resurge():
-    import face_recognition
-    im = face_recognition.load_image_file('/Users/chensg/Pictures/JasonStatham/728da9773912b31b5e6ce9ba8c18367adab4e125_副本2.jpg')
-    face_locs = face_recognition.face_locations(im)
-    
-    top, right, bottom, left = face_locs[0]
-    face_center_x = (left + right) // 2
-    face_center_y = (top + bottom) // 2
-    image_center_x = im.shape[1] // 2
-    image_center_y = im.shape[0] // 2
-    
-    if face_center_x < image_center_x:
-        print('left')
-    else:
-        print('right')
-
-    if face_center_y < image_center_y:
-        print('up')
-    else:
-        print('down')
+@pytest.mark.asyncio
+async def test_2():
+    async with Sess() as s:
+        stmt = select(UserModel).where(UserModel.status.in_(('train', 'finish')), UserModel.user_id == 12).order_by(UserModel.id)
+        rs = await s.execute(stmt)
+        ids = [r[0].id for r in rs.all()]
+        with open('.data', 'w') as f:
+            for idx, model_id in enumerate(ids):
+                f.write(f'{model_id}')
+                if idx < len(ids) - 1:
+                    f.write('\n')

@@ -30,8 +30,7 @@ class UserBehavior(TaskSet):
     def on_start(self):
         cookie_jar = cookiejar_from_dict({settings.token_key: settings.token})
         self.client.client.cookiejar = cookie_jar
-        data = next(csv_data)
-        self.model_id, self.face_id, self.image_ids = int(data[0]), int(data[1]), list(map(int, data[2:]))
+        self.model_id = int(next(csv_data)[0])
 
     @task(3)
     def face(self):
@@ -53,9 +52,10 @@ class UserBehavior(TaskSet):
 
     @task
     def train(self):
-        resurge(1381)   
-        res = self.client.post(f"/app/user/model/train/1381")        
-        log.debug(f'train: model=1381,{res.text}')
+        model_id = self.model_id
+        resurge(model_id)   
+        res = self.client.post(f"/app/user/model/train/{model_id}")        
+        log.debug(f'train: model={model_id},{res.text}')
     
     @task(10)
     def job_state(self):
