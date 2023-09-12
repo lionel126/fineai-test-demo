@@ -1,5 +1,6 @@
 import time
-import concurrent.futures
+import resource
+
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from random import sample, choice
@@ -50,11 +51,11 @@ async def test_train(uid, model_id, face, dataset, update, train):
                 json = {"modelId": model_id, "fileName": face}
                 data = (await (await app.create_face(json)).json())['data']
                 # await upload(face, data['host'], data['uploadParam'])
-                log.debug(f'{model_id=} face before upload')
+                log.debug(f'{model_id=} face before uploading')
                 ts.append(time.time())
                 await uploads([data,])
                 ts.append(time.time())
-                log.debug(f'{model_id=} face after upload')
+                log.debug(f'{model_id=} face after uploaded')
                 image_id = data['id']
             else:
                 # isinstance(face, int)
@@ -149,6 +150,10 @@ async def test_keep_training(uid, model_id, face, dataset, update, train):
 
 @pytest.mark.asyncio
 async def test_train_concurrently():
+    soft_limit = 8 * 1024 * 1024 * 1024
+    hard_limit = 8 * 1024 * 1024 * 1024
+    resource.setrlimit(resource.RLIMIT_AS, (soft_limit, hard_limit))
+
     async def run():
         while True:
             await test_train('a', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True)

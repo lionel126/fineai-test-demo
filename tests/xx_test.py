@@ -36,5 +36,22 @@ async def test_1():
 
 
 def test_resurge():
-    from locustfile import resurge
-    resurge(43169)
+    import face_recognition
+    im = face_recognition.load_image_file('/Users/chensg/Pictures/JasonStatham/728da9773912b31b5e6ce9ba8c18367adab4e125_副本2.jpg')
+    face_locs = face_recognition.face_locations(im)
+    
+    top, right, bottom, left = face_locs[0]
+    face_center_x = (left + right) // 2
+    face_center_y = (top + bottom) // 2
+    image_center_x = im.shape[1] // 2
+    image_center_y = im.shape[0] // 2
+    
+    if face_center_x < image_center_x:
+        print('left')
+    else:
+        print('right')
+
+    if face_center_y < image_center_y:
+        print('up')
+    else:
+        print('down')
