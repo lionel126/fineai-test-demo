@@ -177,7 +177,8 @@ async def test_train_concurrently():
     #     ret = concurrent.futures.as_completed(futures)
     #     # await asyncio.sleep(3600 * 10)
     
-    tasks = [asyncio.create_task(run()) for _ in range(5)]
+    for _ in range(5):
+        asyncio.create_task(run())
     await asyncio.sleep(3600 * 10)
     
     # tasks = [run() for _ in range(2)]

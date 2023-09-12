@@ -36,7 +36,7 @@ async def get_models(size=200, page=1, **kw):
         if kw:
             for k, v in kw.items():
                 if v:
-                    stmt = stmt.where(getattr(Job, k) == v)
+                    stmt = stmt.where(getattr(UserModel, k) == v)
         stmt = stmt.order_by(UserModel.id.desc()
                              ).limit(size).offset((page - 1) * size)
         rs = (await sess.execute(stmt)).all()

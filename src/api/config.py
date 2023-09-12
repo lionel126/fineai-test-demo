@@ -46,4 +46,6 @@ class Settings(BaseSettings):
 
     max_memory: int = 4
 
+    loop_count: int = 50
+
 settings = Settings()
