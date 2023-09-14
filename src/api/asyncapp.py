@@ -148,6 +148,26 @@ class App(AsyncObj):
             "templateId": "UG_tzP8x-STvlGEZCIXVxI_ZBLYendyZXgCLCm6wpkM"
         }'''
 
+    async def create_order(self, json=None, **kw):
+        '''
+        :param json: default {
+            "modelId": 0,
+            "price": 1,
+            "productId": "pum001",
+            "productType": "user-model-pay"
+        }
+        '''
+        path = '/app/order/create'
+        if json is None:
+            json = {
+                "modelId": 0,
+                "price": 1,
+                "productId": "pum001",
+                "productType": "user-model-pay"
+            }
+        json.update(kw)
+        return await self.s.post(path, json=json)
+
 
 async def uploads(fs):
     ssl_ctx = ssl.create_default_context(cafile=settings.REQUESTS_CA_BUNDLE)

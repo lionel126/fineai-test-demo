@@ -9,6 +9,7 @@ from fineai_test.db.app import UserModel, UploadImageFile
 from locust_plugins.csvreader import CSVReader
 
 
+
 @pytest.mark.asyncio
 async def test_1():
     async with Sess() as sess:
@@ -45,3 +46,14 @@ async def test_2():
                 f.write(f'{model_id}')
                 if idx < len(ids) - 1:
                     f.write('\n')
+
+
+def test_zoo():
+    from kazoo.client import KazooClient
+    zk = KazooClient(hosts='192.168.4.51:2181')
+    zk.start()
+    children = zk.get_children('/')
+    print(children)
+    data = zk.get('/xpc/fine/ai/app/dev')
+    print(str(data[0], encoding='utf8'))
+    zk.stop()

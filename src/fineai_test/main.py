@@ -62,6 +62,13 @@ class OutputReq(BaseModel):
     size: int | None = 50
     page: int | None = 1
 
+class Job(BaseModel):
+    job_id: str
+    job_kind: str
+class MqReq(BaseModel):
+    jobs : list[Job]
+    type : str | None = None
+
 
 @app.get("/")
 async def root(request: Request):
@@ -153,7 +160,11 @@ async def jobs(request: Request, req: JobReq = Depends()):
     return templates.TemplateResponse("jobs.html", data)
 
 
-@app.post(path='/consume')
-async def consume(tasks: List[str]):
-    ret = mq.consume(tasks)
+@app.post(path='/mq/consume')
+async def consume_mq(req: MqReq):
+    kw = req.model_dump()
+    if 'type' in kw and kw['type'] in ('force', 'suspend'):
+        ret = mq.fail(**kw)
+    else:
+        ret = mq.consume(**kw)
     return ret

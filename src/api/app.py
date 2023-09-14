@@ -149,6 +149,26 @@ class App():
             "templateId": "UG_tzP8x-STvlGEZCIXVxI_ZBLYendyZXgCLCm6wpkM"
         }'''
 
+    def create_order(self, json=None, **kw):
+        '''
+        :param json: default {
+            "modelId": 0,
+            "price": 1,
+            "productId": "pum001",
+            "productType": "user-model-pay"
+        }
+        '''
+        path = '/app/order/create'
+        if json is None:
+            json = {
+                "modelId": 0,
+                "price": 1,
+                "productId": "pum001",
+                "productType": "user-model-pay"
+            }
+        json.update(kw)
+        return self.s.post(path, json=json)
+
 def upload(file, url, data):
     s = Session()
     with open(file, 'rb') as f:

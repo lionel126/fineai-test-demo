@@ -32,6 +32,7 @@ dependencies = [
     "aiofiles>=23.2.1",
     "locust>=2.16.1",
     "locust-plugins>=4.0.0",
+    "kazoo>=2.9.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

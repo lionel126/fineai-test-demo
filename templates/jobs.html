@@ -3,17 +3,38 @@
 <head>        
     <title>jobs</title>
     <script>
-        function consume(){
-            let data = []
+        function consume(typ){
+            let jobs = []
             let inputs = document.querySelectorAll("input[type='checkbox']:checked").forEach(
-                el => data.push(el.closest('td').nextElementSibling.innerText)
+                el => {
+                    let tr = el.closest('tr')
+                    let job_id = tr.querySelector('td:nth-child(2)').innerText
+                    let job_kind = tr.querySelector('td:nth-child(4)').innerText
+                    jobs.push({
+                        "job_id": job_id,
+                        "job_kind": job_kind,
+                    })
+                }
             )
-            fetch("/consume", {
+            data = {
+                'jobs': jobs,
+            }
+            if (typ === 1){
+                data['type'] = 'fail'
+            } else if (typ === 2){
+                data['type'] = 'force'
+            } else if (typ === 3){
+                data['type'] = 'suspend'
+            } else {
+                data['type'] = 'delete'
+            }
+
+            fetch("/mq/consume", {
                 method: "POST",
                 headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify(data)
             }).then(res => res.text())
-            .then(data => console.log(data))
+            .then(txt => console.log(txt))
             .catch(err => console.log(`error: ${err}`));
             }
         function checkAll(){
@@ -26,7 +47,10 @@
 <h3>jobs</h3>
 <div style="padding: 10px;">
     <button onclick="checkAll()">select all</button>
-    <button onclick="consume()">delete mq message</button>
+    <button onclick="consume()">consume & drop job(s)</button>
+    <button onclick="consume(1)">consume & fail job(s)</button>
+    <button onclick="consume(2)">publish failed message</button>
+    <button onclick="consume(3)">publish processing message</button>
 </div>
 <body>
     <table>
@@ -41,7 +65,7 @@
         <tbody>
             {% for job in jobs %}
             <tr class="{{ 'deleted' if job['is_delete'] == True}}">
-                <td><input {{ 'disabled' if job['job_kind'] != 'lora_train'}} type="checkbox"></td>
+                <td><input {{ 'disabled' if job['job_kind'] not in ('lora_train', 'img2img')}} type="checkbox"></td>
                 {% for k in keys %}
                     {% if k == 'id' %}
                     <td><a href="/model/{{ job['user_model_id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>

@@ -1,5 +1,5 @@
 import logging
-from sqlalchemy import select, case
+from sqlalchemy import select, update, case
 from fineai_test.db import Sess
 from fineai_test.db.app import UploadImageFile, Job, UserModel, OutputImageFile, UserJobImage, UserBaseInfo
 from fineai_test.utils.utils import to_url, key_to_url, file_name, model_to_dict
@@ -332,8 +332,9 @@ async def get_outputs(size=20, page=1, **kw):
         stmt_job = stmt_job.order_by(UserJobImage.created_time.desc(
         ), UserJobImage.id).offset(size * (page - 1)).limit(size)
         jobs = {row[0].id: model_to_dict(row[0]) for row in (await sess.execute(stmt_job)).all()}
-        stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs)).order_by(
-            case({job_id: index for index, job_id in enumerate(jobs)}, value=OutputImageFile.job_id))
+        # stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs)).order_by(
+        #     case({job_id: index for index, job_id in enumerate(jobs)}, value=OutputImageFile.job_id))
+        stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs))
         images = [model_to_dict(row[0]) for row in (await sess.execute(stmt_images)).all()]
         ret = {}
         for job_id, job in jobs.items():
@@ -369,3 +370,10 @@ async def get_jobs(size=200, page=1, **kw):
         'keys': keys,
         'jobs': jobs
     }
+
+
+async def pay(model_id):
+    async with Sess() as sess:
+        stmt = update(UserModel).where(UserModel.id == model_id).values(pay_status='paid')
+        await sess.execute(stmt)
+        await sess.commit()

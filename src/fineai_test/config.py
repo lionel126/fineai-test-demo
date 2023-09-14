@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     rabbitmq_task_exchange: str = "fineai_task"
     rabbitmq_task_topics: list[str] = ["lora_train"]
     rabbitmq_task_queue: str = "fineai_task_train"
+    rabbitmq_sd_queue: str = "fineai_task_sd"
+    rabbitmq_reply_queue: str = "fineai_reply"
 
 
 settings = Settings()

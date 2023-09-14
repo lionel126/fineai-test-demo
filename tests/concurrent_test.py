@@ -7,10 +7,10 @@ from random import sample, choice
 import pytest
 import asyncio
 from api.asyncapp import App, uploads
-from api_test import daddario
+from api_test import daddario, scarlett
 from api_test import pics
 from api.config import settings
-from fineai_test.services.app import get_dataset_images
+from fineai_test.services.app import get_dataset_images, pay
 from fineai_test.services.mq import connect
 
 log = logging.getLogger(__name__)
@@ -22,17 +22,24 @@ log.setLevel(logging.DEBUG)
 
 
 @pytest.mark.parametrize('uid, model_id, face, dataset, update, train', [
-    # ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
+    # ('b', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
     # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
 
-    ('c', None, choice(pics(daddario)), pics(
-        daddario), {'modelName': 'daddario'}, True),
+    ('c', None, pics(scarlett)[0], pics(scarlett), {'modelName': 'scar'}, True),
+    # ('c', 2412, None, None, None, True),
+    # ('b', 1402, pics(scarlett)[0], pics(scarlett), {'modelName': 'scar'}, True),
+    # ('b', None, pics(daddario)[3], pics(daddario), {'modelName': 'daddario'}, False),
+    # ('b', 1303, pics(daddario)[3], pics(daddario), {'modelName': 'daddario'}, False),
+    # ('b', 1303, pics(daddario)[3], [], {'modelName': 'daddario'}, False),
+    # ('b', 1284, pics(daddario)[3], [], {'modelName': 'daddario'}, False),
+    # ('b', 458, None, pics(daddario)[:5], {'modelName': 'daddario'}, False),
+    # ('b', 346, choice(pics(daddario)), None, {'modelName': 'daddario'}, False),
 ])
 @pytest.mark.asyncio
 async def test_train(uid, model_id, face, dataset, update, train):
     async with await App(uid) as app:
         include_previous_images = False
-        if model_id:
+        if model_id and (face is not None or dataset is not None):
             include_previous_images = True
 
         ts = []
@@ -88,7 +95,9 @@ async def test_train(uid, model_id, face, dataset, update, train):
         # if dataset:
         # face合格后上传
         ts.append(time.time())
-        if dataset:
+        if dataset is not None:
+            # None: ignore
+            # []: redo with previous images
             log.debug(f'{model_id=} dataset verify started')
             ids = [image.id for image in await get_dataset_images(model_id) if image.status == 'invalid'] if include_previous_images else []
             if len(ids) < 200:
@@ -99,6 +108,7 @@ async def test_train(uid, model_id, face, dataset, update, train):
                     else:
                         # isinstance(file, str)
                         images.append(file)
+                
                 if images:
                     fs = (await (await app.create_dataset(model_id, images)).json())['data']
                     log.debug(f'{model_id=} dataset before uploading')
@@ -109,6 +119,7 @@ async def test_train(uid, model_id, face, dataset, update, train):
                     for f in fs:
                         # await upload(f['fileName'], f['host'], f['uploadParam'])
                         ids.append(f['id'])
+
             if len(ids) > 200:
                 ids = sample(ids, k=200)
             job_id = (await (await app.finish_dataset(model_id, ids)).json())['data']['jobId']
@@ -121,6 +132,7 @@ async def test_train(uid, model_id, face, dataset, update, train):
                 await asyncio.sleep(1)
         ts.append(time.time())        
         if train:
+            await pay(model_id)
             res = await app.train(model_id)
             ret = await res.json()
             ts.append(time.time())
@@ -184,3 +196,19 @@ async def test_train_concurrently():
     # tasks = [run() for _ in range(2)]
     # await asyncio.gather(*tasks)
     
+
+@pytest.mark.parametrize('uid, modelId', [
+    ('b', 1284),
+])
+@pytest.mark.asyncio
+async def test_pay(uid, modelId):
+    async with await App(uid) as app:
+        await app.create_order(modelId=modelId, price=3)
+
+@pytest.mark.parametrize('uid, modelId', [
+    ('b', 1284),
+])
+@pytest.mark.asyncio
+async def test_output(uid, modelId):
+    async with await App(uid) as app:
+        await app.output_portray(modelId=modelId, themeId=1, themeModelId=1)
