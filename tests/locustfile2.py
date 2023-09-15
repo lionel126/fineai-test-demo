@@ -41,13 +41,13 @@ class UserBehavior(TaskSet):
                 "modelId": 1372
             })
         
-        log.debug(f'face: model=1372,{res.json()}')
+        log.debug(f'face: model=1372,{res.text}')
 
     @task(3)
     def dataset(self):
 
         res = self.client.post(f"/app/user/model/image/dataset/finish?modelId=1345", json=[42627,42658,42631,42673,42639,42630,42637,42662,42656,42667,42670,42663,42644,42672,42651,42634,42675,42654,42646,42674,42650,42671,42636,42657,42629,42632,42645,42648,42624,42647])
-        log.debug(f'dataset: model=1345,{res.json()}')
+        log.debug(f'dataset: model=1345,{res.text}')
         
 
     @task
@@ -61,7 +61,7 @@ class UserBehavior(TaskSet):
     def job_state(self):
         
         res = self.client.get(f'/app/user/model/job/state/3648ad22-8a80-4854-8236-3bb00e07f32d')
-        log.debug(f'job state : {res.json()}')
+        log.debug(f'job state : {res.text}')
 
     @task(5)
     def portray(self):
@@ -71,12 +71,12 @@ class UserBehavior(TaskSet):
             "themeModelId": 1
         }
         res = self.client.post(f'/app/image/output/portray?_priority=1', json=jsn)        
-        log.debug(f'portray: model 100, {res.json()}')
+        log.debug(f'portray: model 100, {res.text}')
         
     @task(10)
     def output_detail(self):
         res = self.client.get(f'/app/image/output/detail/cc6a0806-1796-4931-8bcd-170f220eff74')
-        log.debug(f'output detail: {res.json()}')
+        log.debug(f'output detail: {res.text}')
         
 class MyLocust(FastHttpUser):
     # wait_time = between(1, 2)
