@@ -1,6 +1,6 @@
 import time
 import resource
-
+import random
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from random import sample, choice
@@ -37,6 +37,7 @@ log.setLevel(logging.DEBUG)
 ])
 @pytest.mark.asyncio
 async def test_train(uid, model_id, face, dataset, update, train):
+    params = {'_priority': 1}
     async with await App(uid) as app:
         include_previous_images = False
         if model_id and (face is not None or dataset is not None):
@@ -133,7 +134,7 @@ async def test_train(uid, model_id, face, dataset, update, train):
         ts.append(time.time())        
         if train:
             await pay(model_id)
-            res = await app.train(model_id)
+            res = await app.train(model_id, params=params)
             ret = await res.json()
             ts.append(time.time())
             log.debug(f'{model_id=} {ret=}')
@@ -211,4 +212,7 @@ async def test_pay(uid, modelId):
 @pytest.mark.asyncio
 async def test_output(uid, modelId):
     async with await App(uid) as app:
-        await app.output_portray(modelId=modelId, themeId=1, themeModelId=1)
+        for _ in range(10):
+            priority = random.randint(1,10)
+            params = {'_priority': priority}
+            await app.output_portray(params=params, modelId=modelId, themeId=1, themeModelId=1)

@@ -4,34 +4,40 @@
     <title>outputs</title>        
 </head>
 <h3>outputs</h3>
-<body>
-    <table>
-        <thead class="sticky">                
-            <tr>
-                {% for field in job_keys %}
-                <th>{{ field }}</th>
-                {% endfor %}
-                <th colspan="4">images</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in rows %}
-            <tr class="{{ 'deleted' if row['is_delete'] == True else ''}}">
-                {% for k in job_keys %}
-                    {% if k == 'id' %}
-                    <td><a href="/model/{{ row['user_model_id'] }}/img2img/{{ row[k] }}">{{ row[k] }}</a> </td>
-                    {% elif k == 'user_model_id' %}
-                    <td><a href="/model/{{ row[k] }}/jobs">{{ row[k] }}</a> </td>
-                    {% else %}
-                    <td> {{ row[k] }} </td>
-                    {% endif %}
-                {% endfor %}
-                {% for img in row['images'] %}
-                <td><img src="{{img['url']}}" onclick="zoomImage(this)"></td>
-                {% endfor %}
-            </tr>
+<div>
+    <div style="display: inline-block;"></div>
+    {% include 'components/pagination.html' %}
+</div>
+<table>
+    <thead class="sticky">                
+        <tr>
+            {% for field in job_keys %}
+            <th>{{ field }}</th>
             {% endfor %}
-        </tbody>
-    </table>
-</body>
+            <th colspan="4">images</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr class="{{ 'deleted' if row['is_delete'] == True else ''}}">
+            {% for k in job_keys %}
+                {% if k == 'id' %}
+                <td><a href="/model/{{ row['user_model_id'] }}/img2img/{{ row[k] }}">{{ row[k] }}</a> </td>
+                {% elif k == 'user_model_id' %}
+                <td><a href="/model/{{ row[k] }}/jobs">{{ row[k] }}</a> </td>
+                {% else %}
+                <td> {{ row[k] }} </td>
+                {% endif %}
+            {% endfor %}
+            {% for img in row['images'] %}
+            <td><img src="{{img['url']}}" onclick="zoomImage(this)"></td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div>
+    <div style="display: inline-block;"></div>
+    {% include 'components/pagination.html' %}
+</div>
 {% endblock %}

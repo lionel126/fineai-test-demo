@@ -44,42 +44,50 @@
         }
     </script>
 </head>
+
+
 <h3>jobs</h3>
-<div style="padding: 10px;">
-    <button onclick="checkAll()">select all</button>
-    <button onclick="consume()">consume & drop job(s)</button>
-    <button onclick="consume(1)">consume & fail job(s)</button>
-    <button onclick="consume(2)">publish failed message</button>
-    <button onclick="consume(3)">publish processing message</button>
+<div>
+    <div style="padding: 10px; float:left">
+        <button onclick="checkAll()">select all</button>
+        <button onclick="consume()">consume & drop job(s)</button>
+        <button onclick="consume(1)">consume & fail job(s)</button>
+        <button onclick="consume(2)">publish failed message</button>
+        <button onclick="consume(3)">publish processing message</button>
+    </div>
+    {% include 'components/pagination.html' %}
 </div>
-<body>
-    <table>
-        <thead class="sticky">                
-            <tr>
-                <th></th>
-                {% for k in keys %}
-                <th>{{ k }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for job in jobs %}
-            <tr class="{{ 'deleted' if job['is_delete'] == True}}">
-                <td><input {{ 'disabled' if job['job_kind'] not in ('lora_train', 'img2img')}} type="checkbox"></td>
-                {% for k in keys %}
-                    {% if k == 'id' %}
-                    <td><a href="/model/{{ job['user_model_id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>
-                    {% elif k == 'status' %}
-                    <td class="{{ job[k] }}">{{ job[k] }}</td>
-                    {% elif k in ('params', 'result') %}
-                    <td class="text2long">{{ job[k]|tojson }}</td>
-                    {% else %}
-                    <td>{{ job[k] }}</td>
-                    {% endif %}
-                {% endfor %}
-            </tr>
+<table>
+    <thead class="sticky">                
+        <tr>
+            <th></th>
+            {% for k in keys %}
+            <th>{{ k }}</th>
             {% endfor %}
-        </tbody>
-    </table>
-</body>
+        </tr>
+    </thead>
+    <tbody>
+        {% for job in jobs %}
+        <tr class="{{ 'deleted' if job['is_delete'] == True}}">
+            <td><input {{ 'disabled' if job['job_kind'] not in ('lora_train', 'img2img')}} type="checkbox"></td>
+            {% for k in keys %}
+                {% if k == 'id' %}
+                <td><a href="/model/{{ job['user_model_id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>
+                {% elif k == 'status' %}
+                <td class="{{ job[k] }}">{{ job[k] }}</td>
+                {% elif k in ('params', 'result') %}
+                <td class="text2long">{{ job[k]|tojson }}</td>
+                {% else %}
+                <td>{{ job[k] }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div>
+<div style="display: inline-block;"></div>
+{% include 'components/pagination.html' %}
+</div>
+
 {% endblock %}

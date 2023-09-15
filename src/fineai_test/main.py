@@ -4,15 +4,18 @@ from fastapi.templating import Jinja2Templates
 # from fastapi_pagination import Page, add_pagination, paginate
 from pydantic import BaseModel, ConfigDict
 from typing import List
+from fastapi_pagination import add_pagination
 
 from fineai_test.services.app import get_images_by_job, compare_job_results, \
     get_model_jobs, get_model_lora, get_model_dataset_verify, \
     get_lora_result, get_models, get_model_face_detection, \
     get_model_img2img, get_outputs, get_jobs
 from fineai_test.services import mq
+from fineai_test import trial
 
 app = FastAPI()
-
+add_pagination(app)
+app.include_router(trial.router)
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 

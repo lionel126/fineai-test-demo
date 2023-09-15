@@ -54,7 +54,7 @@ class UserBehavior(TaskSet):
     def train(self):
         model_id = self.model_id
         resurge(model_id)   
-        res = self.client.post(f"/app/user/model/train/{model_id}")        
+        res = self.client.post(f"/app/user/model/train/{model_id}?_priority=1")        
         log.debug(f'train: model={model_id},{res.text}')
     
     @task(10)
@@ -70,7 +70,7 @@ class UserBehavior(TaskSet):
             "themeId": 3,
             "themeModelId": 1
         }
-        res = self.client.post(f'/app/image/output/portray', json=jsn)        
+        res = self.client.post(f'/app/image/output/portray?_priority=1', json=jsn)        
         log.debug(f'portray: model 100, {res.json()}')
         
     @task(10)

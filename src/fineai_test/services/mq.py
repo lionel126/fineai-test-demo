@@ -1,5 +1,3 @@
-import time
-import json
 import pika
 import logging
 import platform
@@ -18,17 +16,17 @@ def connect(queue_name):
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
 
-    method = channel.queue_declare(queue=queue_name, durable=True, arguments={
+    queue = channel.queue_declare(queue=queue_name, durable=True, arguments={
         'x-message-ttl': 60*60*24*1000*7,
         'x-max-priority': 10,
     })
     
-    return connection, channel, method
+    return connection, channel, queue
 
 
-def config(queue_name:str, connection:pika.BlockingConnection, channel:BlockingChannel, mthd:pika.frame.Method, tasks_to_ack: list[str], ret: list, response_type: str | None = None):
+def config(queue_name:str, connection:pika.BlockingConnection, channel:BlockingChannel, queue:pika.frame.Method, tasks_to_ack: list[str], ret: list, response_type: str | None = None):
     # train
-    channel.basic_qos(prefetch_count=mthd.method.message_count)
+    channel.basic_qos(prefetch_count=queue.method.message_count)
     # for topic in settings.rabbitmq_task_topics:
     #     channel.queue_bind(
     #         queue=settings.rabbitmq_task_queue,
@@ -53,7 +51,7 @@ def config(queue_name:str, connection:pika.BlockingConnection, channel:BlockingC
             ret.append(str(request.task_no))
         count += 1
         # queue.method.message_count is fixed got by queue_declare(), dont update if changed
-        if count == mthd.method.message_count:
+        if count == queue.method.message_count:
             connection.close()
 
     channel.basic_consume(queue=queue_name,
@@ -70,10 +68,10 @@ def consume(jobs: list[str], type: str | None = None):
     img2img_jobs = [job['job_id'] for job in jobs if job['job_kind'] == 'img2img']
     if lora_train_jobs:
         try:
-            connection, channel, method = connect(settings.rabbitmq_task_queue)
-            log.debug(f'{method.method.message_count=}')
-            if method.method.message_count != 0:
-                config(settings.rabbitmq_task_queue, connection, channel, method, lora_train_jobs, ret, response_type=type)
+            connection, channel, queue = connect(settings.rabbitmq_task_queue)
+            log.debug(f'{queue.method.message_count=}')
+            if queue.method.message_count != 0:
+                config(settings.rabbitmq_task_queue, connection, channel, queue, lora_train_jobs, ret, response_type=type)
                 channel.start_consuming()
             else:
                 connection.close()
@@ -82,10 +80,10 @@ def consume(jobs: list[str], type: str | None = None):
             log.debug("no messages in the lora train queue. Exiting...")
     if img2img_jobs:
         try:
-            connection, channel, method = connect(settings.rabbitmq_sd_queue)
-            log.debug(f'{method.method.message_count=}')
-            if method.method.message_count != 0:
-                config(settings.rabbitmq_sd_queue, connection, channel, method, img2img_jobs, ret, response_type=type)
+            connection, channel, queue = connect(settings.rabbitmq_sd_queue)
+            log.debug(f'{queue.method.message_count=}')
+            if queue.method.message_count != 0:
+                config(settings.rabbitmq_sd_queue, connection, channel, queue, img2img_jobs, ret, response_type=type)
                 channel.start_consuming()
             else:
                 connection.close()

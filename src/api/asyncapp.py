@@ -108,9 +108,9 @@ class App(AsyncObj):
         path = '/app/user/model/update'
         return await self.s.post(path, json=json)
 
-    async def train(self, model_id: int,):
+    async def train(self, model_id: int, params=None):
         path = f'app/user/model/train/{model_id}'
-        return await self.s.post(path)
+        return await self.s.post(path, params=params)
 
     async def theme_list(self):
         path = '/app/theme/list'
@@ -120,7 +120,7 @@ class App(AsyncObj):
         path = f'/app/theme/detail/{theme_id}'
         return await self.s.get(path)
 
-    async def output_portray(self, json=None, **kw):
+    async def output_portray(self, json=None, params=None, **kw):
         '''json: default = {
             "modelId": 0,
             "themeId": 0,
@@ -134,7 +134,7 @@ class App(AsyncObj):
             }
         json.update(kw)
         path = '/app/image/output/portray'
-        return await self.s.post(path, json=json)
+        return await self.s.post(path, params=params, json=json)
 
     async def template_list(self):
         path = '/app/template/list'

@@ -1,0 +1,46 @@
+
+    
+<div id="pagination" style="float: right">
+    {% if pages %}
+        {% if pages > 1 %}    
+        <a>1</a>
+        {% endif %}
+        {% if pages > 2 %}    
+        <a>2</a>
+        {% endif %}
+        {% if page - 1 > 2 + 1 %}    
+        ...
+        {% endif %}        
+        {% if page - 1 > 2 and page - 1 < pages - 1%}    
+        <a>{{ page - 1 }}</a>
+        {% endif %}
+        {% if page > 2 and page < pages - 1 %}    
+        <a>{{ page }}</a>
+        {% endif %}
+        {% if page + 1 > 2 and page + 1 < pages - 1 %}    
+        <a>{{ page+1 }}</a>
+        {% endif %}
+        {% if pages - 1 > page + 1 + 1%}    
+        ...
+        {% endif %}  
+        {% if pages -1 > 2 %}    
+        <a>{{pages - 1 }}</a>
+        {% endif %}            
+    <a>{{ pages }}</a>
+    {% endif %}
+</div>
+
+
+
+<script type="text/javascript">
+    function paginate(){
+        let u = new URL(window.location.href)
+        document.querySelectorAll('#pagination a').forEach(
+            it => {
+                u.searchParams.set('page', it.innerText)
+                it.setAttribute('href', u.toString())
+            }
+        )
+    }
+    paginate()
+</script>

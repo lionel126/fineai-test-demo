@@ -4,28 +4,34 @@
     <title>models</title>        
 </head>
 <h3>models</h3>
-<body>
-    <table>
-        <thead class="sticky">                
-            <tr>
-                {% for k in keys %}
-                <th>{{ k }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for model in models %}
-            <tr class="{{ 'deleted' if model['is_delete'] == True else ''}}">
-                {% for k in keys %}
-                    {% if k == 'id' %}
-                    <td><a href="/model/{{ model[k] }}/jobs">{{ model[k] }}</a> </td>
-                    {% else %}
-                    <td> {{ model[k] }} </td>
-                    {% endif %}
-                {% endfor %}
-            </tr>
+<div>
+    <div style="display: inline-block;"></div>
+    {% include 'components/pagination.html' %}
+</div>
+<table>
+    <thead class="sticky">                
+        <tr>
+            {% for k in keys %}
+            <th>{{ k }}</th>
             {% endfor %}
-        </tbody>
-    </table>
-</body>
+        </tr>
+    </thead>
+    <tbody>
+        {% for model in models %}
+        <tr class="{{ 'deleted' if model['is_delete'] == True else ''}}">
+            {% for k in keys %}
+                {% if k == 'id' %}
+                <td><a href="/model/{{ model[k] }}/jobs">{{ model[k] }}</a> </td>
+                {% else %}
+                <td> {{ model[k] }} </td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div>
+    <div style="display: inline-block;"></div>
+    {% include 'components/pagination.html' %}
+</div>
 {% endblock %}

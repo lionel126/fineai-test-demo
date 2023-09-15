@@ -33,6 +33,7 @@ dependencies = [
     "locust>=2.16.1",
     "locust-plugins>=4.0.0",
     "kazoo>=2.9.0",
+    "sqlakeyset>=2.0.1691149549",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

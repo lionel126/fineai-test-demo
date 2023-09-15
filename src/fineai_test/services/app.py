@@ -1,5 +1,6 @@
 import logging
-from sqlalchemy import select, update, case
+import math
+from sqlalchemy import select, update, case, func
 from fineai_test.db import Sess
 from fineai_test.db.app import UploadImageFile, Job, UserModel, OutputImageFile, UserJobImage, UserBaseInfo
 from fineai_test.utils.utils import to_url, key_to_url, file_name, model_to_dict
@@ -37,6 +38,8 @@ async def get_models(size=200, page=1, **kw):
             for k, v in kw.items():
                 if v:
                     stmt = stmt.where(getattr(UserModel, k) == v)
+        total = (await sess.execute(select(func.count()).select_from(stmt))).scalar()
+        pages = math.ceil(total / size)
         stmt = stmt.order_by(UserModel.id.desc()
                              ).limit(size).offset((page - 1) * size)
         rs = (await sess.execute(stmt)).all()
@@ -45,7 +48,11 @@ async def get_models(size=200, page=1, **kw):
     keys = models[0].keys() if models else []
     return {
         'keys': keys,
-        'models': models
+        'models': models,
+        'page': page,
+        'size': size,
+        'pages': pages,
+        'total': total,
     }
 
 
@@ -324,14 +331,16 @@ async def get_model_img2img(model_id, job_id):
 
 async def get_outputs(size=20, page=1, **kw):
     async with Sess() as sess:
-        stmt_job = select(UserJobImage)
+        stmt = select(UserJobImage)
         if kw:
             for k, v in kw.items():
                 if v:
-                    stmt_job = stmt_job.where(getattr(UserJobImage, k) == v)
-        stmt_job = stmt_job.order_by(UserJobImage.created_time.desc(
+                    stmt = stmt.where(getattr(UserJobImage, k) == v)
+        total = (await sess.execute(select(func.count()).select_from(stmt))).scalar()
+        pages = math.ceil(total / size)
+        stmt = stmt.order_by(UserJobImage.created_time.desc(
         ), UserJobImage.id).offset(size * (page - 1)).limit(size)
-        jobs = {row[0].id: model_to_dict(row[0]) for row in (await sess.execute(stmt_job)).all()}
+        jobs = {row[0].id: model_to_dict(row[0]) for row in (await sess.execute(stmt)).all()}
         # stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs)).order_by(
         #     case({job_id: index for index, job_id in enumerate(jobs)}, value=OutputImageFile.job_id))
         stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs))
@@ -348,7 +357,11 @@ async def get_outputs(size=20, page=1, **kw):
 
         return {
             "job_keys": ["id", "user_model_id",	"image_type", "show_name", "updated_time", "created_time", "is_delete",	"status"],
-            "rows": result
+            "rows": result,
+            'page': page,
+            'size': size,
+            'pages': pages,
+            'total': total,
         }
 
 
@@ -359,16 +372,24 @@ async def get_jobs(size=200, page=1, **kw):
             for k, v in kw.items():
                 if v:
                     stmt = stmt.where(getattr(Job, k) == v)
+        total = (await sess.execute(select(func.count()).select_from(stmt))).scalar()
+        pages = math.ceil(total / size)
+        
         stmt = stmt.order_by(Job.created_time.desc()).limit(
             size).offset((page - 1) * size)
         rs = (await sess.execute(stmt)).all()
+        
 
     jobs = [model_to_dict(r[0]) for r in rs]
 
     keys = jobs[0].keys() if jobs else []
     return {
         'keys': keys,
-        'jobs': jobs
+        'jobs': jobs,
+        'page': page,
+        'size': size,
+        'pages': pages,
+        'total': total,
     }
 
 
