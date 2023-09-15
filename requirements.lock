@@ -32,7 +32,7 @@ decorator==5.1.1
 executing==1.2.0
 fastapi==0.101.1
 fastapi-pagination==0.12.9
-fineai-task-schema @ git+https://robot:b37b72ff3562754b870e265aafe2d795464e3202@gitea.vmovier.cc/fineai/fineai-task-schema.git@v0.1.13
+fineai-task-schema @ git+https://robot:b37b72ff3562754b870e265aafe2d795464e3202@gitea.vmovier.cc/fineai/fineai-task-schema.git@v0.3.0
 flask==2.3.3
 flask-basicauth==0.2.0
 flask-cors==4.0.0
