@@ -39,7 +39,9 @@ class App(AsyncObj):
         iss = f'http://{url.hostname}' + (f':{url.port}' if url.port else '')
         # port: 80 in request header host on prod
         if settings.env == 'prod':
-            iss = f'https://{url.hostname}:80'
+            # iss = f'https://{url.hostname}:80'
+            # iss = f'http://{url.hostname}:9090'
+            iss = f'{url.scheme}://{url.hostname}:{url.port if url.port else 80}'
         if isinstance(uid, str):
             user = settings.get_user_info(uid)
         else:
