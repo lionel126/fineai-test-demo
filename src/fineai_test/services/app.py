@@ -134,7 +134,7 @@ async def get_model_jobs(model_id):
         ret = {
             "model": model_to_dict(model),
             "job_keys": ["id", "job_kind",
-                         #   "params", "result",
+                         "params", "result",
                          "priority", "status",
                          "is_delete", "created_time", "theme_param"],
             "jobs": jobs
