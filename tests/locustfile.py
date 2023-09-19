@@ -1,14 +1,13 @@
 import logging
-from sqlalchemy import select, update
+from sqlalchemy import update
 import time
 import gevent
 from requests.cookies import cookiejar_from_dict
-from locust import task, between, TaskSet
-from locust.contrib.fasthttp import FastHttpUser, FastResponse
+from locust import task, TaskSet
+from locust.contrib.fasthttp import FastHttpUser
 from locust_plugins.csvreader import CSVReader
 from api.config import settings
 from fineai_test.db.app import UploadImageFile
-from fineai_test.db import Sess as Asess
 from api.db import Sess
 
 log = logging.getLogger(__name__)
@@ -22,7 +21,7 @@ csv_data = CSVReader(".data")
 def resurge(image_id):
     with Sess() as s:
         stmt = update(UploadImageFile).where(UploadImageFile.id == image_id).values(is_delete=False)
-        ret = s.execute(stmt)
+        s.execute(stmt)
         s.commit()
 
 class UserBehavior(TaskSet):
@@ -90,7 +89,7 @@ class UserBehavior(TaskSet):
             "themeId": 3,
             "themeModelId": 1
         }
-        res = self.client.post(f'/app/image/output/portray', json=jsn)        
+        res = self.client.post('/app/image/output/portray', json=jsn)        
         log.debug(f'model={self.model_id}, portray:{res.json()}')
         job_id = res.json()['data']['jobId']
         

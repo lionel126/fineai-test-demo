@@ -3,7 +3,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 # from fastapi_pagination import Page, add_pagination, paginate
 from pydantic import BaseModel, ConfigDict
-from typing import List
 from fastapi_pagination import add_pagination
 
 from fineai_test.services.app import get_images_by_job, compare_job_results, \

@@ -72,7 +72,9 @@
             <td><input {{ 'disabled' if job['job_kind'] not in ('lora_train', 'img2img')}} type="checkbox"></td>
             {% for k in keys %}
                 {% if k == 'id' %}
-                <td><a href="/model/{{ job['user_model_id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a> </td>
+                <td><a href="/model/{{ job['user_model_id'] }}/{{ job['job_kind'] }}/{{ job[k] }}">{{ job[k] }}</a></td>
+                {% elif k == 'user_model_id' %}
+                <td><a href="/model/{{ job['user_model_id'] }}/jobs">{{ job[k] }}</a></td>
                 {% elif k == 'status' %}
                 <td class="{{ job[k] }}">{{ job[k] }}</td>
                 {% elif k in ('params', 'result') %}

@@ -1,6 +1,6 @@
 import logging
 import math
-from sqlalchemy import select, update, case, func
+from sqlalchemy import select, update, func
 from fineai_test.db import Sess
 from fineai_test.db.app import UploadImageFile, Job, UserModel, OutputImageFile, UserJobImage, UserBaseInfo
 from fineai_test.utils.utils import to_url, key_to_url, file_name, model_to_dict
@@ -133,10 +133,9 @@ async def get_model_jobs(model_id):
 
         ret = {
             "model": model_to_dict(model),
-            "job_keys": ["id", "job_kind",
-                         "params", "result",
-                         "priority", "status",
-                         "is_delete", "created_time", "theme_param"],
+            "job_keys": ["id", "user_model_id", "job_kind", "params", "result",
+                         "priority", "status", "is_delete", "created_time",
+                         "updated_time", "theme_param"],
             "jobs": jobs
         }
         return ret
@@ -343,7 +342,8 @@ async def get_outputs(size=20, page=1, **kw):
         jobs = {row[0].id: model_to_dict(row[0]) for row in (await sess.execute(stmt)).all()}
         # stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs)).order_by(
         #     case({job_id: index for index, job_id in enumerate(jobs)}, value=OutputImageFile.job_id))
-        stmt_images = select(OutputImageFile).where(OutputImageFile.job_id.in_(jobs))
+        stmt_images = select(OutputImageFile).where(
+            OutputImageFile.job_id.in_(jobs))
         images = [model_to_dict(row[0]) for row in (await sess.execute(stmt_images)).all()]
         ret = {}
         for job_id, job in jobs.items():
@@ -374,11 +374,10 @@ async def get_jobs(size=200, page=1, **kw):
                     stmt = stmt.where(getattr(Job, k) == v)
         total = (await sess.execute(select(func.count()).select_from(stmt))).scalar()
         pages = math.ceil(total / size)
-        
+
         stmt = stmt.order_by(Job.created_time.desc()).limit(
             size).offset((page - 1) * size)
         rs = (await sess.execute(stmt)).all()
-        
 
     jobs = [model_to_dict(r[0]) for r in rs]
 
@@ -395,6 +394,7 @@ async def get_jobs(size=200, page=1, **kw):
 
 async def pay(model_id):
     async with Sess() as sess:
-        stmt = update(UserModel).where(UserModel.id == model_id).values(pay_status='paid')
+        stmt = update(UserModel).where(UserModel.id ==
+                                       model_id).values(pay_status='paid')
         await sess.execute(stmt)
         await sess.commit()

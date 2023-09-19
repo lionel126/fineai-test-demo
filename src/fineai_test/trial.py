@@ -2,18 +2,13 @@
 # todo
 
 # rye add sqlakeyset
-import logging
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
-from sqlalchemy import select, update, case
-from fastapi_pagination import add_pagination
+from fastapi import APIRouter
+from sqlalchemy import select
 from fastapi_pagination.cursor import CursorPage
-from fastapi_pagination.ext.sqlalchemy import paginate, AsyncConn
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
+from fastapi_pagination.ext.sqlalchemy import paginate
 
 from fineai_test.db import Sess
-from fineai_test.db.app import UploadImageFile, Job, UserModel, OutputImageFile, UserJobImage, UserBaseInfo
-from fineai_test.utils.utils import to_url, key_to_url, file_name, model_to_dict
+from fineai_test.db.app import Job
 
 router = APIRouter(prefix='/api')
 

@@ -1,13 +1,10 @@
 import random
 import os
 from sqlalchemy import select
-from requests import request
 import pytest
-from api.config import settings
 from fineai_test.db import Sess
 from fineai_test.db.app import UserModel, UploadImageFile
 # from locust.contrib.csvreader import CSVReader
-from locust_plugins.csvreader import CSVReader
 
 
 @pytest.mark.asyncio
@@ -19,7 +16,7 @@ async def test_1():
         err = {}
         with open('.data', 'w') as f:
             for idx, mid in enumerate(ids):
-                stmt_images = select(UploadImageFile).where(UploadImageFile.user_model_id == mid, UploadImageFile.is_delete == False)
+                stmt_images = select(UploadImageFile).where(UploadImageFile.user_model_id == mid, UploadImageFile.is_delete is False)
                 rs_images = await sess.execute(stmt_images)
                 rows = rs_images.all()
                 uri = [r[0].id for r in rows if r[0].image_type == 'face_detection'][0]

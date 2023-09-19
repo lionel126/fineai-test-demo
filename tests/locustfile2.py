@@ -1,14 +1,11 @@
 import logging
-from sqlalchemy import select, update
-import time
-import gevent
+from sqlalchemy import update
 from requests.cookies import cookiejar_from_dict
-from locust import task, between, TaskSet
-from locust.contrib.fasthttp import FastHttpUser, FastResponse
+from locust import task, TaskSet
+from locust.contrib.fasthttp import FastHttpUser
 from locust_plugins.csvreader import CSVReader
 from api.config import settings
-from fineai_test.db.app import UploadImageFile, UserModel
-from fineai_test.db import Sess as Asess
+from fineai_test.db.app import UserModel
 from api.db import Sess
 
 log = logging.getLogger(__name__)
@@ -22,7 +19,7 @@ csv_data = CSVReader(".data")
 def resurge(model_id):
     with Sess() as s:
         stmt = update(UserModel).where(UserModel.id == model_id).values(status='pending')
-        ret = s.execute(stmt)
+        s.execute(stmt)
         s.commit()
 
 class UserBehavior(TaskSet):
@@ -46,7 +43,7 @@ class UserBehavior(TaskSet):
     @task(3)
     def dataset(self):
 
-        res = self.client.post(f"/app/user/model/image/dataset/finish?modelId=1345", json=[42627,42658,42631,42673,42639,42630,42637,42662,42656,42667,42670,42663,42644,42672,42651,42634,42675,42654,42646,42674,42650,42671,42636,42657,42629,42632,42645,42648,42624,42647])
+        res = self.client.post("/app/user/model/image/dataset/finish?modelId=1345", json=[42627,42658,42631,42673,42639,42630,42637,42662,42656,42667,42670,42663,42644,42672,42651,42634,42675,42654,42646,42674,42650,42671,42636,42657,42629,42632,42645,42648,42624,42647])
         log.debug(f'dataset: model=1345,{res.text}')
         
 
@@ -60,7 +57,7 @@ class UserBehavior(TaskSet):
     @task(10)
     def job_state(self):
         
-        res = self.client.get(f'/app/user/model/job/state/3648ad22-8a80-4854-8236-3bb00e07f32d')
+        res = self.client.get('/app/user/model/job/state/3648ad22-8a80-4854-8236-3bb00e07f32d')
         log.debug(f'job state : {res.text}')
 
     @task(5)
@@ -70,12 +67,12 @@ class UserBehavior(TaskSet):
             "themeId": 3,
             "themeModelId": 1
         }
-        res = self.client.post(f'/app/image/output/portray?_priority=1', json=jsn)        
+        res = self.client.post('/app/image/output/portray?_priority=1', json=jsn)        
         log.debug(f'portray: model 100, {res.text}')
         
     @task(10)
     def output_detail(self):
-        res = self.client.get(f'/app/image/output/detail/cc6a0806-1796-4931-8bcd-170f220eff74')
+        res = self.client.get('/app/image/output/detail/cc6a0806-1796-4931-8bcd-170f220eff74')
         log.debug(f'output detail: {res.text}')
         
 class MyLocust(FastHttpUser):
