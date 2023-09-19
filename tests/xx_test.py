@@ -1,4 +1,5 @@
 import random
+import os
 from sqlalchemy import select
 from requests import request
 import pytest
@@ -7,7 +8,6 @@ from fineai_test.db import Sess
 from fineai_test.db.app import UserModel, UploadImageFile
 # from locust.contrib.csvreader import CSVReader
 from locust_plugins.csvreader import CSVReader
-
 
 
 @pytest.mark.asyncio
@@ -37,6 +37,7 @@ async def test_1():
 
 @pytest.mark.asyncio
 async def test_2():
+    '''dump training data for load testing'''
     async with Sess() as s:
         stmt = select(UserModel).where(UserModel.status.in_(('train', 'finish')), UserModel.user_id == 12).order_by(UserModel.id)
         rs = await s.execute(stmt)
@@ -47,6 +48,18 @@ async def test_2():
                 if idx < len(ids) - 1:
                     f.write('\n')
 
+def test_3():
+    '''split .data to different locust'''
+    # 10 locusts, 100 model ids / locust
+    count = 100
+    amount = 10
+    dirs = [os.path.join('..', f'fineai-test{i}') for i in range(amount)]
+    with open('.data', 'r') as f:
+        lines = f.readlines()
+    for d in dirs:
+        with open(os.path.join(d, '.data'), 'w') as f:
+            f.writelines(lines[:count])
+            lines = lines[count:]
 
 def test_zoo():
     from kazoo.client import KazooClient

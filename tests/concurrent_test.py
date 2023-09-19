@@ -25,7 +25,7 @@ log.setLevel(logging.DEBUG)
     # ('b', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
     # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
 
-    ('c', None, pics(scarlett)[0], pics(scarlett), {'modelName': 'scar'}, False),
+    ('b', None, pics(scarlett)[0], pics(scarlett)[:32], {'modelName': 'scar'}, False),
     # (23, 2440, pics(scarlett)[0], pics(scarlett), {'modelName': 'scar'}, False),
     # ('c', 2412, None, None, None, True),
     # ('b', 1402, pics(scarlett)[0], pics(scarlett), {'modelName': 'scar'}, True),
