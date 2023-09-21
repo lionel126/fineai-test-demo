@@ -279,7 +279,7 @@ async def get_model_dataset_verify(model_id, job_id=None):
         "job": model_to_dict(job),
         "images": combined,
         "image_keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time", "is_delete"],
-        "job_keys": ["distance", "tolerance", "face_count", "success", "message"],
+        "job_keys": ["distance", "tolerance", "face_count", "success", "message", "face_locations", "scale_factor"],
     }
 
 
