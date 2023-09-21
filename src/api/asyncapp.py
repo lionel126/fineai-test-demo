@@ -122,6 +122,19 @@ class App(AsyncObj):
         path = f'/app/theme/detail/{theme_id}'
         return await self.s.get(path)
 
+    async def output_list(self, model_id, params=None, **kw):
+        '''
+        params: {
+            "createdTime": 0,
+            "size": 10 # not work
+        }
+        '''
+        if params is None:
+            params = {}
+        params.update(kw)
+        path = f'/app/image/output/list/{model_id}'
+        return await self.s.get(path, params=params)
+
     async def output_portray(self, json=None, params=None, **kw):
         '''json: default = {
             "modelId": 0,
@@ -137,6 +150,37 @@ class App(AsyncObj):
         json.update(kw)
         path = '/app/image/output/portray'
         return await self.s.post(path, params=params, json=json)
+
+    async def output_detail(self, output_id):
+        path = f'/app/image/output/detail/{output_id}'
+        return await self.s.get(path)
+    
+    async def favorite(self, json=None, **kw):
+        '''
+        json: {
+                "imageId": 0,
+                "modelId": 0
+            }
+        '''
+        if json is None:
+            json = {}
+        json.update(kw)
+        path = '/app/favorite/create'
+        return await self.s.post(path, json=json)
+
+
+    async def unfavorite(self, json=None, **kw):        
+        '''
+        json: {
+                "imageId": 0,
+                "modelId": 0
+            }
+        '''
+        if json is None:
+            json = {}
+        json.update(kw)
+        path = '/app/favorite/cancel'
+        return await self.s.post(path, json=json)
 
     async def template_list(self):
         path = '/app/template/list'

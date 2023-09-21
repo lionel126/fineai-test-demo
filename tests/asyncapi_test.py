@@ -25,16 +25,12 @@ log.setLevel(logging.DEBUG)
     # ('b', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
     # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
 
-    ('b', None, pics(scarlett)[0], pics(scarlett)[:32], {'modelName': 'scar'}, False),
+    ('b', None, pics(scarlett)[0], pics(scarlett)[1:33], {'modelName': 'scar'}, False),
+    # ('b', None, pics(scarlett)[0], pics(scarlett)[:32], {'modelName': 'scar'}, False),
     # (23, 2440, pics(scarlett)[0], pics(scarlett), {'modelName': 'scar'}, False),
     # ('c', 2412, None, None, None, True),
     # ('b', 1402, pics(scarlett)[0], pics(scarlett), {'modelName': 'scar'}, True),
     # ('b', None, pics(daddario)[3], pics(daddario), {'modelName': 'daddario'}, False),
-    # ('b', 1303, pics(daddario)[3], pics(daddario), {'modelName': 'daddario'}, False),
-    # ('b', 1303, pics(daddario)[3], [], {'modelName': 'daddario'}, False),
-    # ('b', 1284, pics(daddario)[3], [], {'modelName': 'daddario'}, False),
-    # ('b', 458, None, pics(daddario)[:5], {'modelName': 'daddario'}, False),
-    # ('b', 346, choice(pics(daddario)), None, {'modelName': 'daddario'}, False),
 ])
 @pytest.mark.asyncio
 async def test_train(uid, model_id, face, dataset, update, train):
@@ -208,12 +204,44 @@ async def test_pay(uid, modelId):
         await app.create_order(modelId=modelId, price=3)
 
 @pytest.mark.parametrize('uid, modelId', [
-    ('b', 1284),
+    ('c', 2504),
 ])
 @pytest.mark.asyncio
 async def test_output(uid, modelId):
     async with await App(uid) as app:
-        for _ in range(10):
-            priority = random.randint(1,10)
-            params = {'_priority': priority}
+        for _ in range(10):            
+            params = {'_priority': 1}
             await app.output_portray(params=params, modelId=modelId, themeId=1, themeModelId=1)
+
+
+@pytest.mark.parametrize('uid, modelId', [
+    ('c', 2504),
+])
+@pytest.mark.asyncio
+async def test_output_list(uid, modelId):
+    count = 0
+    async with await App(uid) as app:
+        createdTime = 0
+        while True:
+            data = (await (await app.output_list(modelId, createdTime=createdTime)).json())['data']
+            l = len(data)
+            print(f'{l=}')
+            if l == 0:
+                break
+            count += l
+            createdTime = data[-1]['createdTime']
+            
+    print(f'{count=}')
+
+@pytest.mark.parametrize('uid, modelId', [
+    ('c', 2504),
+])
+@pytest.mark.asyncio
+async def test_favorite(uid, modelId):
+    async with await App(uid) as app:
+        data = (await (await app.output_list(modelId)).json())['data']
+        for out in data:
+            images = (await (await app.output_detail(out['id'])).json())['data']['images']
+            for im in images:
+                await app.favorite(imageId=im['id'], modelId=modelId)
+        
