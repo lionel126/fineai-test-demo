@@ -310,7 +310,7 @@ async def get_model_face_detection(model_id, job_id=None):
         "job": model_to_dict(job),
         "images": combined,
         "image_keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time"],
-        "job_keys": ["face_count", "success", "message"],
+        "job_keys": ["face_count", "success", "message", "face_locations", "scale_factor"],
     }
 
 
