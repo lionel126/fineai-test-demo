@@ -2,6 +2,9 @@ import random
 import os
 from sqlalchemy import select
 import pytest
+from PIL import Image, ImageOps
+import numpy
+import face_recognition
 from fineai_test.db import Sess
 from fineai_test.db.app import UserModel, UploadImageFile
 # from locust.contrib.csvreader import CSVReader
@@ -67,3 +70,151 @@ def test_zoo():
     data = zk.get('/xpc/fine/ai/app/dev')
     print(str(data[0], encoding='utf8'))
     zk.stop()
+
+def test_pillow_pad():
+    image = Image.open('/Users/chensg/Downloads/891.jpg')
+    box = (-250, 277, 250, 1000)
+    box = (0, 277, 250, 1000)
+    cropped_im = ImageOps.pad(image.crop(box), (512, 512), color='red')
+    cropped_im.save('/Users/chensg/Downloads/891-2-2.jpg')
+
+def test_pillow_expand():
+    image = Image.open('/Users/chensg/Downloads/891.jpg')
+    box = (-250, 277, 250, 1000)
+    cropped_im = ImageOps.expand(image.crop(box), (50, 0, 0, 20), fill='red')
+    cropped_im.save('/Users/chensg/Downloads/891-3.jpg')
+
+def test_pillow_paste():
+    image = Image.open('/Users/chensg/Downloads/891.jpg')
+    new = Image.new('RGBA', (512, 512), (255, 255, 255, 0))
+    # box = (-250, 277, 250, 1000)
+    box = (0, 277, 250, 1000)
+    new.paste(image.crop(box))
+    new.save('/Users/chensg/Downloads/891-5.png')
+
+def expand(box:tuple[int], size:tuple[int], factor:int=1):
+    '''
+    size: (width, height)
+
+    box: left, upper, right, lower
+    centering: ? ?
+    '''
+    width = box[2] - box[0]
+    height = box[3] - box[1]
+    w = int(width * factor / 2)
+    h = int(height * factor / 2)
+    print(f'{w=}, {h=}, {size=}')
+    # left = box[0] - w if box[0] - w > 0 else 0
+    # upper = box[1] - h if box[1] - h > 0 else 0
+    # right = box[2] + w if box[2] + w <= size[0] else size[0]
+    # lower = box[3] + h if box[3] + h <= size[1] else size[1]
+    left = box[0] - w
+    upper = box[1] - h
+    right = box[2] + w
+    lower = box[3] + h
+    box = (
+        left if left > 0 else 0,
+        upper if upper > 0 else 0,
+        right if right < size[0] else size[0],
+        lower if lower < size[1] else size[1]
+    )
+    # fix
+    centering = (
+       ((box[2] + box[0]) / 2 - (box[2] - box[0]) / 2 ) / (box[2] - box[0]),
+       (box[1] + box[3] - 2 * upper) / (lower - upper) / 2, 
+    )
+    return box, centering
+
+    
+
+def test_pillow_x():
+    image = Image.open('/Users/chensg/Pictures/JasonStatham/16206391125879.jpg')
+    
+    locs = face_recognition.face_locations(numpy.array(image))
+    print(locs)
+    box = locs[0][3], locs[0][0], locs[0][1], locs[0][2]
+    print(f'{box=}')
+    box, centering = expand(box, image.size, 2)
+    print(f'{box=}, {centering=}')
+    cropped = ImageOps.pad(image.crop(box), (512, 512), color='white', centering=centering)
+    cropped.save('/Users/chensg/Pictures/JasonStatham/16206391125879-1.jpg')
+
+def test_pillow_y():
+    image = Image.open('/Users/chensg/Pictures/JasonStatham/16206391125879.jpg')
+
+    # 定义裁剪区域
+    left = -100
+    upper = 100
+    right = 500
+    lower = 500
+    box=(614, -199, 1943, 1130)
+    left, upper, right, lower = box
+
+    # 进行裁剪
+    cropped_image = image.crop((left, upper, right, lower))
+
+    # 定义填充颜色为红色
+    fill_color = (255, 0, 0)
+
+    # 计算填充的尺寸
+    padding_width = max(0, right - left)
+    padding_height = max(0, lower - upper)
+
+    # 进行填充
+    padded_image = ImageOps.pad(cropped_image, (padding_width, padding_height), color=fill_color)
+
+    # 保存裁剪后的图像
+    padded_image.save('/Users/chensg/Pictures/JasonStatham/16206391125879-3.jpg')
+
+
+def test_zzz():
+    def crop_image(image_path, output_path, x, y, rec_length, margin_ratio, sample_length):
+        image = Image.open(image_path)
+        #  image.show()
+        white = (255, 255, 255)
+        #  图像重新缩放，识别的面部区域增加了margin之后，边长缩放到sample_length的对应比例
+        resize_ratio = sample_length / (rec_length * (1 + margin_ratio))
+        #  原图进行缩放
+        image = image.resize((round(image.size[0] * resize_ratio), round(image.size[1] * resize_ratio)))
+        #  计算上下左右单边的扩展边长度
+        margin_length = round(sample_length * margin_ratio / (1 + margin_ratio) / 2)
+        #  创建一个包含扩展边长度的底板
+        margin_image = Image.new('RGB', (image.size[0] + margin_length * 2, image.size[1] + margin_length * 2), white)
+        #  将缩放后的原图，粘贴到含扩展边底板的中间，在裁剪靠近边缘时，会截取到扩展边的白色区域
+        margin_image.paste(image,
+                        (0 + margin_length, 0 + margin_length, image.size[0] + margin_length,
+                            image.size[1] + margin_length))
+        # margin_image.show()
+        # 计算缩放后原图中，识别出的脸部位置坐标
+        resized_x = round(x * resize_ratio)
+        resized_y = round(y * resize_ratio)
+        # 裁剪出sample_length长度的方形脸部区域
+        cropped_image = margin_image.crop((resized_x, resized_y, resized_x + sample_length, resized_y + sample_length))
+        cropped_image.show()
+        cropped_image.save(output_path)
+    image_path = "/Users/chensg/Pictures/6286fe3bd99fb.jpeg"
+    output_path = "/Users/chensg/Pictures/cropped.jpg"
+    # x = 378  # 原图中脸部识别的起始横坐标
+    # y = 437  # 原图中脸部识别的起始横坐标
+    # rec_length = 787 - 378  # 原图中的脸部识别方形的边长，需要判断是不是大于等于face_limit像素，小于的话，判定不合格
+    
+    # 
+    # box = ()
+    # x = box[0]
+    # y = box[1]
+    # rec_length = box[2] - box[0]
+    # face location
+    box = (268, 798, 397, 669)
+    box = (402, 1405, 510, 1298)
+    box = (59, 460, 122, 398)
+    x = box[3]
+    y = box[0]
+    rec_length = box[2] - box[0]
+    margin_ratio = 25  # 对识别部分扩展边的比例，比如margin_ratio为0.6，则在识别的脸部区域上下左右各增加0.3倍原区域边长的margin，总边长变为1.6倍
+    sample_length = 512  # 标准方形样本边长
+    # face_limit = math.ceil(sample_length / (1+margin_ratio))
+    crop_image(image_path, output_path, x, y, rec_length, margin_ratio, sample_length)
+
+def test_pillow_format():
+    im = Image.open('/Users/chensg/Pictures/WechatIMG340.jpeg')
+    print(im.format)

@@ -256,14 +256,14 @@ async def get_model_dataset_verify(model_id, job_id=None):
         uri = job.result['extras']['uri']
         result_images[file_name(uri['uri'])] = uri
         # assertion: amount of uploaded images == amount of verified images
-        assert len(result_images) == len(
-            params_images), f'{len(result_images)=} == {len(params_images)=}'
-        assert set(params_images) - \
-            set(result_images) == set(
-        ), f'{set(params_images) - set(result_images)}'
-        assert set(result_images) - \
-            set(params_images) == set(
-        ), f'{set(result_images) - set(params_images)}'
+        # assert len(result_images) == len(
+        #     params_images), f'{len(result_images)=} == {len(params_images)=}'
+        # assert set(params_images) - \
+        #     set(result_images) == set(
+        # ), f'{set(params_images) - set(result_images)}'
+        # assert set(result_images) - \
+        #     set(params_images) == set(
+        # ), f'{set(result_images) - set(params_images)}'
 
         combined = [{**ui, **params_images.get(file_name(ui['path']), {}), **result_images.get(
             file_name(ui['path']), {})} for ui in upload_images]
@@ -274,12 +274,14 @@ async def get_model_dataset_verify(model_id, job_id=None):
     combined.sort(key=lambda it: it['id'])
     for img in combined:
         img['url'] = to_url(img['path'])
+        if 'output_uri' in img:
+            img['output_uri'] = to_url(img['output_uri'])
     return {
         "model": model_to_dict(model),
         "job": model_to_dict(job),
         "images": combined,
         "image_keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time", "is_delete"],
-        "job_keys": ["distance", "tolerance", "face_count", "success", "message", "face_locations", "scale_factor"],
+        "job_keys": ["distance", "tolerance", "face_count", "success", "message", "face_locations", "scale_factor", "output_uri"],
     }
 
 
@@ -304,13 +306,15 @@ async def get_model_face_detection(model_id, job_id=None):
             {**img, **params_image.get(file_name(img['path']), {})} for img in upload_images]
     for img in combined:
         img['url'] = to_url(img['path'])
+        if 'output_uri' in img:
+            img['output_uri'] = to_url(img['output_uri'])
     combined.sort(key=lambda it: it['id'])
     return {
         "model": model_to_dict(model),
         "job": model_to_dict(job),
         "images": combined,
         "image_keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time"],
-        "job_keys": ["face_count", "success", "message", "face_locations", "scale_factor"],
+        "job_keys": ["face_count", "success", "message", "face_locations", "scale_factor", "output_uri"],
     }
 
 

@@ -26,8 +26,10 @@ brotli==1.1.0
 certifi==2023.7.22
 charset-normalizer==3.2.0
 click==8.1.7
+comm==0.1.4
 configargparse==1.7
 coverage==7.3.0
+debugpy==1.8.0
 decorator==5.1.1
 dlib==19.24.2
 executing==1.2.0
@@ -48,11 +50,14 @@ hashids==1.3.1
 idna==3.4
 inflect==7.0.0
 iniconfig==2.0.0
+ipykernel==6.25.2
 ipython==8.14.0
 itsdangerous==2.1.2
 jedi==0.19.0
 jinja2==3.1.2
 jmespath==1.0.1
+jupyter-client==8.3.1
+jupyter-core==5.3.1
 kazoo==2.9.0
 locust==2.16.1
 locust-plugins==4.0.0
@@ -60,6 +65,7 @@ markupsafe==2.1.3
 matplotlib-inline==0.1.6
 msgpack==1.0.5
 multidict==6.0.4
+nest-asyncio==1.5.8
 numpy==1.25.2
 packaging==23.1
 parso==0.8.3
@@ -67,6 +73,7 @@ pexpect==4.8.0
 pickleshare==0.7.5
 pika==1.3.2
 pillow==10.0.0
+platformdirs==3.10.0
 pluggy==1.2.0
 prompt-toolkit==3.0.39
 psutil==5.9.5
@@ -97,6 +104,7 @@ sqlakeyset==2.0.1691149549
 sqlalchemy==2.0.20
 stack-data==0.6.2
 starlette==0.27.0
+tornado==6.3.3
 traitlets==5.9.0
 typing-extensions==4.7.1
 urllib3==1.26.16
