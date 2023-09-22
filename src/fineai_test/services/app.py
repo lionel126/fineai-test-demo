@@ -210,13 +210,14 @@ async def get_model_lora(model_id, job_id):
     images = await _get_images_by_model(model_id)
     for img in images:
         img.url = to_url(img.path)
+        img.cropped = img.url.replace('upload', 'cropped')
 
     job_result = await get_lora_result(job_id)
     job = job_result['job']
     count = 0
     for image in images:
         for img in job_result['images']:
-            if img['url'] == image.url:
+            if img['url'].replace('cropped', 'upload') == image.url:
                 count += 1
                 image.uploaded = img['url']
                 image.trained = img['trained_url'] if 'trained_url' in img else ''
@@ -227,7 +228,7 @@ async def get_model_lora(model_id, job_id):
     ret = {
         "model": model_to_dict(model),
         "job": model_to_dict(job),
-        "image_keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time"],
+        "image_keys": ["id", "url", "job_id", "image_type", "reason", "status", "created_time", "cropped"],
         "job_keys": ["trained", "txt"],
         "images": images,
     }
