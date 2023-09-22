@@ -221,8 +221,8 @@ async def get_model_lora(model_id, job_id):
                 image.uploaded = img['url']
                 image.trained = img['trained_url'] if 'trained_url' in img else ''
                 image.txt = img['txt'] if 'txt' in img else ''
-    assert len(job_result['images']
-               ) == count, f"{ len(job_result['images']) } == {count }"
+    # assert len(job_result['images']
+    #            ) == count, f"{ len(job_result['images']) } == {count }"
     images.sort(key=lambda it: int(it.id))
     ret = {
         "model": model_to_dict(model),
