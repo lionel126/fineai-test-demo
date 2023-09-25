@@ -299,7 +299,9 @@ async def get_model_face_detection(model_id, job_id=None):
     uri = job.params['uri']
     params_image = {file_name(uri): {'uri': uri}}
     if job.status == 'success':
+        uri = job.result['extras']['uri']
         result_image = {file_name(uri): job.result['extras']}
+        print(result_image)
         combined = [{**img, **params_image.get(file_name(img['path']), {}), **result_image.get(
             file_name(img['path']), {})} for img in upload_images]
     else:

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     app_base_url: str = 'https://dev-wukm.vmovier.cc'
     internal_base_url: str = 'https://dev-wukm.vmovier.cc/internal/'
+    task_base_url: str = 'http://10.173.36.244/api/v1/task/'
     http_proxy: str = ''
     https_proxy: str = ''
     REQUESTS_CA_BUNDLE: str = ''
