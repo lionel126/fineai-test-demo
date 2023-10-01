@@ -1,4 +1,5 @@
 import ssl
+import logging
 import aiohttp
 import asyncio
 import aiofiles
@@ -8,7 +9,7 @@ from .session import AsyncSession
 from .config import settings
 from fineai_test.services.app import get_user_info
 
-
+log = logging.getLogger(__name__)
 class AsyncObj():
     async def __new__(cls, *a, **kw):
         inst = super().__new__(cls)
@@ -42,6 +43,11 @@ class App(AsyncObj):
             # iss = f'https://{url.hostname}:80'
             # iss = f'http://{url.hostname}:9090'
             iss = f'{url.scheme}://{url.hostname}:{url.port if url.port else 80}'
+        
+        # # req through ingress
+        # log.warn(f'{iss=}')
+        # iss = 'http://xw.fineai.pro'
+        
         if isinstance(uid, str):
             user = settings.get_user_info(uid)
         else:
