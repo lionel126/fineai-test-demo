@@ -1,10 +1,13 @@
+import logging
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 # from fastapi_pagination import Page, add_pagination, paginate
 from pydantic import BaseModel, ConfigDict
 from fastapi_pagination import add_pagination
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from fineai_test.db import get_db
 from fineai_test.services.app import get_images_by_job, compare_job_results, \
     get_model_jobs, get_model_lora, get_model_dataset_verify, \
     get_lora_result, get_models, get_model_face_detection, \
@@ -79,85 +82,85 @@ async def root(request: Request):
 
 
 @app.get("/models")
-async def models(request: Request, req: ModelReq = Depends()):
+async def models(request: Request, req: ModelReq = Depends(), db: AsyncSession = Depends(get_db)):
     data = {
         'request': request,
-        **await get_models(**req.model_dump())
+        **await get_models(db, **req.model_dump())
     }
     return templates.TemplateResponse("models.html", data)
 
 
 @app.get(path="/compare/{job_id1}/vs/{job_id2}", response_class=HTMLResponse)
-async def compare_job(request: Request, job_id1, job_id2):
-    # ?
-    ret = await compare_job_results(job_id1, job_id2)
+async def compare_job(request: Request, job_id1, job_id2, db: AsyncSession = Depends(get_db)):
+    # deprecated ?
+    ret = await compare_job_results(db, job_id1, job_id2)
     data = {"request": request, "job_id1": job_id1, "job_id2": job_id2, **ret}
     return templates.TemplateResponse("vs.html", data)
 
 
 @app.get(path="/job/{job_id}/images")
-async def job_images(job_id):
+async def job_images(job_id, db: AsyncSession = Depends(get_db)):
     '''deprecated
     '''
-    return await get_images_by_job(job_id)
+    return await get_images_by_job(db, job_id)
 
 
 @app.get(path="/model/{model_id}/jobs")
-async def model(request: Request, model_id: int):
-    ret = await get_model_jobs(model_id)
+async def model(request: Request, model_id: int, db: AsyncSession = Depends(get_db)):
+    ret = await get_model_jobs(db, model_id)
     data = {"request": request, **ret}
     return templates.TemplateResponse("model_jobs.html", data)
 
 
 @app.get(path="/model/{model_id}/lora_train/{job_id}")
-async def model_lora(request: Request, model_id: int, job_id):
-    ret = await get_model_lora(model_id, job_id)
+async def model_lora(request: Request, model_id: int, job_id, db: AsyncSession = Depends(get_db)):
+    ret = await get_model_lora(db, model_id, job_id)
     data = {"request": request, **ret}
     return templates.TemplateResponse("model_lora.html", data)
 
 
 @app.get(path="/model/{model_id}/dataset_verify/{job_id}")
-async def model_dataset_verify(request: Request, model_id: int, job_id=None):
-    ret = await get_model_dataset_verify(model_id, job_id)
+async def model_dataset_verify(request: Request, model_id: int, job_id=None, db: AsyncSession = Depends(get_db)):
+    ret = await get_model_dataset_verify(db, model_id, job_id)
     data = {"request": request, **ret}
     return templates.TemplateResponse("model_dataset_verify.html", data)
 
 
 @app.get(path="/model/{model_id}/face_detection/{job_id}")
-async def model_face_detection(request: Request, model_id: int, job_id=None):
-    ret = await get_model_face_detection(model_id, job_id)
+async def model_face_detection(request: Request, model_id: int, job_id=None, db: AsyncSession = Depends(get_db)):
+    ret = await get_model_face_detection(db, model_id, job_id)
     data = {"request": request, **ret}
     return templates.TemplateResponse("model_face_detection.html", data)
 
 
 @app.get(path="/lora/{job_id}")
 @app.get(path="/lora_train/{job_id}")
-async def lora_images(request: Request, job_id: str):
+async def lora_images(request: Request, job_id: str, db: AsyncSession = Depends(get_db)):
     # deprecated
-    ret = await get_lora_result(job_id)
+    ret = await get_lora_result(db, job_id)
     data = {"request": request, **ret}
     return templates.TemplateResponse("lora.html", data)
 
 
 @app.get(path="/model/{model_id}/img2img/{job_id}")
-async def img2img(request: Request, model_id: int, job_id: str):
-    ret = await get_model_img2img(model_id, job_id)
+async def img2img(request: Request, model_id: int, job_id: str, db: AsyncSession = Depends(get_db)):
+    ret = await get_model_img2img(db, model_id, job_id)
     data = {"request": request, **ret}
     return templates.TemplateResponse("model_img2img.html", data)
 
 
 @app.get(path='/outputs')
-async def outputs(request: Request, req: OutputReq = Depends()):
+async def outputs(request: Request, req: OutputReq = Depends(), db: AsyncSession = Depends(get_db)):
 
-    ret = await get_outputs(**req.model_dump())
+    ret = await get_outputs(db, **req.model_dump())
     data = {"request": request, **ret}
     return templates.TemplateResponse("outputs.html", data)
 
 
 @app.get(path='/jobs')
-async def jobs(request: Request, req: JobReq = Depends()):
+async def jobs(request: Request, req: JobReq = Depends(), db: AsyncSession = Depends(get_db)):
 
-    ret = await get_jobs(**req.model_dump())
+    ret = await get_jobs(db, **req.model_dump())
     data = {"request": request, **ret}
     return templates.TemplateResponse("jobs.html", data)
 
