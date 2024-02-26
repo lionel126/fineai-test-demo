@@ -1,3 +1,4 @@
+import os
 import logging
 from hashids import Hashids
 import hashlib
@@ -25,3 +26,7 @@ def jwt_token(user, iss='http://192.168.103.101:9090'):
     log.debug(f'{user}, {payload=}, {user.openid=}')
     encoded_jwt = jwt.encode(payload, user.openid, algorithm="HS256")
     return encoded_jwt
+
+def files(directory, exclude:None|list=None):
+    
+    return [os.path.join(directory, f) for f in os.listdir(directory) if not exclude or f not in exclude]

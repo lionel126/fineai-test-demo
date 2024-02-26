@@ -29,6 +29,10 @@ spec:
           value: Asia/Shanghai
         - name: CUDA_TOOLKIT_ROOT_DIR
           value: /usr/local/cuda
+      ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
       volumeMounts:
         - mountPath: /app/logs
           name: data

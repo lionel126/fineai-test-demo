@@ -1,6 +1,7 @@
 import logging
 import math
 from sqlalchemy import select, update, func
+from sqlalchemy.ext.asyncio import AsyncSession
 from fineai_test.db.app import UploadImageFile, Job, UserModel, OutputImageFile, UserJobImage, UserBaseInfo
 from fineai_test.utils.utils import to_url, key_to_url, file_name, model_to_dict
 from fineai_test.utils import s3
@@ -13,25 +14,25 @@ log = logging.getLogger(__name__)
 #     return s, stmt
 
 
-async def get_user_info(db, user_id: int):
-    
-    stmt = select(UserBaseInfo).where(UserBaseInfo.id == user_id)
+async def get_user_info(db: AsyncSession, user_info_id: int):
+
+    stmt = select(UserBaseInfo).where(UserBaseInfo.id == user_info_id)
     rs = await db.execute(stmt)
     row = rs.one_or_none()
     if row:
         return row[0]
 
 
-async def get_dataset_images(db, model_id: int) -> list[UploadImageFile]:
-    
+async def get_dataset_images(db: AsyncSession, model_id: int) -> list[UploadImageFile]:
+
     stmt = select(UploadImageFile).where(
         UploadImageFile.user_model_id == model_id)
     rows = (await db.execute(stmt)).all()
     return [row[0] for row in rows]
 
 
-async def get_models(db, size=200, page=1, **kw):
-    
+async def get_models(db: AsyncSession, size=200, page=1, **kw):
+
     stmt = select(UserModel)
     if kw:
         for k, v in kw.items():
@@ -40,7 +41,7 @@ async def get_models(db, size=200, page=1, **kw):
     total = (await db.execute(select(func.count()).select_from(stmt))).scalar()
     pages = math.ceil(total / size)
     stmt = stmt.order_by(UserModel.id.desc()
-                            ).limit(size).offset((page - 1) * size)
+                         ).limit(size).offset((page - 1) * size)
     rs = (await db.execute(stmt)).all()
     models = [model_to_dict(r[0]) for r in rs]
 
@@ -55,16 +56,16 @@ async def get_models(db, size=200, page=1, **kw):
     }
 
 
-async def get_images_by_job(db, job_id):
+async def get_images_by_job(db: AsyncSession, job_id):
     # deprecated
-    
+
     stmt = select(UploadImageFile).where(UploadImageFile.job_id == job_id)
     rs = await db.execute(stmt)
     return [row[0] for row in rs.all()]
 
 
-async def _get_images_by_model(db, model_id):
-    
+async def _get_images_by_model(db: AsyncSession, model_id):
+
     stmt = select(UploadImageFile).where(
         UploadImageFile.user_model_id == model_id)
     rs = await db.execute(stmt)
@@ -72,14 +73,14 @@ async def _get_images_by_model(db, model_id):
     return [row[0] for row in rs.all()]
 
 
-async def _get_output_images_by_job(db, job_id):
-    
+async def _get_output_images_by_job(db: AsyncSession, job_id):
+
     stmt = select(OutputImageFile).where(OutputImageFile.job_id == job_id)
     rs = await db.execute(stmt)
     return [row[0] for row in rs.all()]
 
 
-async def compare_job_results(db, job_id1, job_id2):
+async def compare_job_results(db: AsyncSession, job_id1, job_id2):
     job1 = await _get_job(db, job_id1, 'dataset_verify')
     job2 = await _get_job(db, job_id2, 'dataset_verify')
     j1 = job1.result['extras']
@@ -115,33 +116,33 @@ async def compare_job_results(db, job_id1, job_id2):
     }
 
 
-async def _get_model(db, model_id):
-    
+async def _get_model(db: AsyncSession, model_id):
+
     stmt = select(UserModel).where(UserModel.id == model_id)
     row = (await db.execute(stmt)).one_or_none()
     if row:
         return row[0]
 
 
-async def get_model_jobs(db, model_id):
-    
+async def get_model_jobs(db: AsyncSession, model_id):
+
     model = await _get_model(db, model_id)
     stmt = select(Job).where(Job.user_model_id ==
-                                model_id).order_by(Job.created_time.desc())
+                             model_id).order_by(Job.created_time.desc())
     jobs = [job[0] for job in (await db.execute(stmt)).all()]
 
     ret = {
         "model": model_to_dict(model),
         "job_keys": ["id", "user_model_id", "job_kind", "params", "result",
-                        "priority", "status", "is_delete", "created_time",
-                        "updated_time", "theme_param"],
+                     "priority", "status", "is_delete", "created_time",
+                     "updated_time", "theme_param"],
         "jobs": jobs
     }
     return ret
 
 
-async def _get_job(db, job_id, kind=None):
-    
+async def _get_job(db: AsyncSession, job_id, kind=None):
+
     if kind:
         stmt = select(Job).where(Job.id == job_id, Job.job_kind == kind)
     else:
@@ -151,7 +152,7 @@ async def _get_job(db, job_id, kind=None):
         return rs[0]
 
 
-async def get_lora_result(db, job_id):
+async def get_lora_result(db: AsyncSession, job_id):
     lora = await _get_job(db, job_id, kind='lora_train')
     if not lora:
         return
@@ -205,7 +206,7 @@ async def get_lora_result(db, job_id):
     }
 
 
-async def get_model_lora(db, model_id, job_id):
+async def get_model_lora(db: AsyncSession, model_id, job_id):
     model = await _get_model(db, model_id)
     images = await _get_images_by_model(db, model_id)
     for img in images:
@@ -235,7 +236,7 @@ async def get_model_lora(db, model_id, job_id):
     return ret
 
 
-async def get_model_dataset_verify(db, model_id, job_id=None):
+async def get_model_dataset_verify(db: AsyncSession, model_id, job_id=None):
     model = await _get_model(db, model_id)
     upload_images = [model_to_dict(img) for img in await _get_images_by_model(db, model_id)]
     job = await _get_job(db, job_id, kind='dataset_verify')
@@ -286,7 +287,7 @@ async def get_model_dataset_verify(db, model_id, job_id=None):
     }
 
 
-async def get_model_face_detection(db, model_id, job_id=None):
+async def get_model_face_detection(db: AsyncSession, model_id, job_id=None):
     model = await _get_model(db, model_id)
     upload_images = [model_to_dict(img) for img in await _get_images_by_model(db, model_id)]
     job = await _get_job(db, job_id, kind='face_detection')
@@ -321,7 +322,7 @@ async def get_model_face_detection(db, model_id, job_id=None):
     }
 
 
-async def get_model_img2img(db, model_id, job_id):
+async def get_model_img2img(db: AsyncSession, model_id, job_id):
     model = await _get_model(db, model_id)
     job = await _get_job(db, job_id, kind='img2img')
     images = await _get_output_images_by_job(db, job_id)
@@ -335,8 +336,8 @@ async def get_model_img2img(db, model_id, job_id):
     }
 
 
-async def get_outputs(db, size=20, page=1, **kw):
-    
+async def get_outputs(db: AsyncSession, size=20, page=1, **kw):
+
     stmt = select(UserJobImage)
     if kw:
         for k, v in kw.items():
@@ -372,7 +373,7 @@ async def get_outputs(db, size=20, page=1, **kw):
     }
 
 
-async def get_jobs(db, size=200, page=1, **kw):
+async def get_jobs(db: AsyncSession, size=200, page=1, **kw):
 
     stmt = select(Job)
     if kw:
@@ -399,9 +400,9 @@ async def get_jobs(db, size=200, page=1, **kw):
     }
 
 
-async def pay(db, model_id):
-    
+async def pay(db: AsyncSession, model_id):
+
     stmt = update(UserModel).where(UserModel.id ==
-                                model_id).values(pay_status='paid')
+                                   model_id).values(pay_status='paid')
     await db.execute(stmt)
     await db.commit()

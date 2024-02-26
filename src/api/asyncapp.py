@@ -8,12 +8,13 @@ from .utils import jwt_token
 from .session import AsyncSession
 from .config import settings
 from fineai_test.services.app import get_user_info
+from fineai_test.db import Sess
 
 log = logging.getLogger(__name__)
 class AsyncObj():
     async def __new__(cls, *a, **kw):
         inst = super().__new__(cls)
-        await inst.__init__(*a, **kw)
+        await inst.__init__(*a, **kw) # type: ignore
         return inst
 
 
@@ -51,7 +52,8 @@ class App(AsyncObj):
         if isinstance(uid, str):
             user = settings.get_user_info(uid)
         else:
-            user = await get_user_info(uid)
+            async with Sess() as db: # type: ignore
+                user = await get_user_info(db, uid)
         self.s.cookie_jar.update_cookies(
             {settings.token_key: jwt_token(user, iss)})
 
@@ -95,6 +97,10 @@ class App(AsyncObj):
         if model_id:
             url += f'?modelId={model_id}'
         return await self.s.post(url, json=ids)
+
+    async def delete_image(self, image_id):
+        url = f'/app/user/model/upload/image/delete/{image_id}'
+        return await self.s.post(url)
 
     async def update_model(self, json=None, **kw):
         '''json: default = {
@@ -217,9 +223,23 @@ class App(AsyncObj):
                 "productId": "pum001",
                 "productType": "user-model-pay"
             }
-        json.update(kw)
+        if kw: 
+            json.update(kw)
         return await self.s.post(path, json=json)
 
+    async def output_hd(self, json=None, **kw):
+        '''
+        :param json: {
+            "modelId": 0,
+            "imageId": 0,
+        }, default -> {}
+        '''
+        path = '/app/image/output/hd'
+        if json is None:
+            json = {}
+        if kw: 
+            json.update(kw)
+        return await self.s.post(path, json=json)
 
 async def uploads(fs):
     ssl_ctx = ssl.create_default_context(cafile=settings.REQUESTS_CA_BUNDLE)
@@ -235,7 +255,7 @@ async def uploads(fs):
 
 async def upload(s: aiohttp.ClientSession, file: str, url: str, data: dict):
     async with aiofiles.open(file, 'rb') as f:
-        file = {data['key']: await f.read()}
-        data.update(file)
+        temp = {data['key']: await f.read()}
+        data.update(temp)
         res = await s.post(url, data=data, proxy=settings.http_proxy)
     return res

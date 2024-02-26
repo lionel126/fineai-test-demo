@@ -1,6 +1,5 @@
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from fineai_test.db import app
 from fineai_test.config import settings
 
 engines = {
@@ -15,8 +14,8 @@ engines = {
 
 # Sess = sessionmaker(class_=AsyncSession, sync_session_class=RoutingSession)
 
-Sess = sessionmaker(bind=engines['app_store'], class_=AsyncSession)
+Sess = sessionmaker(bind=engines['app_store'], class_=AsyncSession) # type ignore
 
 async def get_db():
-    async with Sess() as db:
+    async with Sess() as db: # type ignore
         yield db

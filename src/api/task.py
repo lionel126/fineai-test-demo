@@ -1,4 +1,3 @@
-import requests
 from .config import settings
 from .session import Session
 

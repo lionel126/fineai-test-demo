@@ -1,10 +1,10 @@
 from random import choice, sample
-import os
 import time
 import pytest
 from api.app import App, upload
 from api import db
 from api.config import settings
+from api.utils import files
 
 scarlett = settings.scarlett
 daddario = settings.daddario
@@ -12,11 +12,6 @@ captain = settings.captain
 guoda = settings.guoda
 jason = settings.jason
 lf = settings.lf
-
-
-def pics(directory):
-    return [os.path.join(directory, f) for f in os.listdir(directory)]
-
 
 face_ext_heif = '/Users/chensg/Pictures/scarlettJohansson/379.heif'
 face_ext_avif = '/Users/chensg/Pictures/hero.avif'  # not supported file format
@@ -32,10 +27,10 @@ error_files = [face_ext_avif, face_not_human, face_too_many]
     # ('c', None, choice(pics(scarlett)), pics(scarlett), {'modelName': 'scar'}, True),
     # ('c', None, choice(pics(daddario)), pics(daddario), {'modelName': 'daddario'}, True),
 
-    ('c', 491, choice(pics(daddario)), pics(
-        daddario), {'modelName': 'daddario'}, True),
+    # ('c', 491, choice(pics(daddario)), pics(
+    #     daddario), {'modelName': 'daddario'}, True),
 
-    ('c', 494, choice(pics(daddario)), pics(
+    ('c', 494, choice(files(daddario)), files(
         daddario), {'modelName': 'daddario'}, True),
 
 ])
@@ -170,7 +165,7 @@ def test_finish_face_with_old_image_id(user, model_id, image_id):
     # ('c', 333, face_file),
     # ('b', 333, face_file),
     # ('b', 330, face_file2),
-    ('b', 331, choice(pics(daddario)))
+    ('b', 331, choice(files(daddario)))
 ])
 def test_finish_face_with_new_image(user, model_id, face_file):
     # create face
@@ -228,7 +223,7 @@ def test_finish_dataset_with_old_image(user, model_id, ids):
     # ('b', 333, files[:1]),
     # ('b', 330, [image_avif, image_heif, image_no_face, image_too_many_faces]),
     # ('b', 330, files + error_files),
-    ('b', 342, pics(scarlett)[0:1]),
+    ('b', 342, files(scarlett)[0:1]),
 
 ])
 def test_finish_dataset_with_new_image(user, model_id, dataset):

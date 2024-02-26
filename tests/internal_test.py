@@ -2,7 +2,7 @@ import pytest
 from api.server_internal import Internal
 
 @pytest.mark.parametrize('model_id', [
-    2493, 2492
+    2623
 ])
 def test_generate_avatar(model_id):
     Internal().generate_avatar(model_id)
